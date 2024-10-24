@@ -7,12 +7,7 @@ A comprehensive mobile application built using **React Native** for managing emp
 - **Absence Tracking**: Request leaves, view leave balances, and track upcoming absences.
 - **Expense Reporting**: Submit and manage expense claims, attach receipts, and track reimbursement statuses.
 - **Approval Workflow**: Managers can review and approve or reject timesheets, absence requests, and expense reports directly from the app.
-
-## Tech Stack
-- **React Native**: Cross-platform mobile development framework.
-- **Redux**: For state management across the application.
-- **Firebase/REST APIs**: Integration with backend services for data management and synchronization.
-
+  
 ## Installation
 
 1. Clone the repository:
