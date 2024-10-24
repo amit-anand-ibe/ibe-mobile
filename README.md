@@ -1,2 +1,2 @@
-# ibe-mobile
-The mobile application repository developed in React Native
+# ibe-mobile-application
+A comprehensive mobile application built using React Native for managing employee workflows. The app includes key features such as timesheet management, absence tracking, expense reporting, and approvals, providing a streamlined experience for employees and managers alike. Designed with a focus on efficiency and usability, this application enables users to easily submit, monitor, and approve various work-related activities from their mobile devices.
