@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   View,
   KeyboardAvoidingView,
   Platform,
   Text,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { BUSOBJCATMAP } from "../../constants";
 import DateFilter from "./DateFilter";

@@ -8,9 +8,9 @@ import {
   TouchableOpacity,
   Platform,
   Text,
-  SafeAreaView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { isEqual } from "../utils/FormatUtils";
 import CustomTextInput from "./CustomTextInput";
@@ -196,8 +196,9 @@ const CustomPicker = ({
           </Modal>
         </>
       ) : (
-        <SafeAreaView style={[styles.androidPicker, pickerStyle]}>
+        <View style={[styles.androidPicker, pickerStyle]}>
           <Picker
+            style={{ height: 50 }}
             selectedValue={selectedValue}
             onValueChange={handleValueChange}
             enabled={!disabled}
@@ -210,7 +211,7 @@ const CustomPicker = ({
               <Picker.Item key={index} label={item.label} value={item.value} />
             ))}
           </Picker>
-        </SafeAreaView>
+        </View>
       )}
       {/* Search input */}
       {!hideSearchInput && (

@@ -2,28 +2,38 @@
   "expo": {
     "name": "ibe-mobile",
     "slug": "ibe-mobile",
-    "version": "1.0.1", // Public-facing version
+    "version": "1.1.0",
     "orientation": "portrait",
-    "icon": "./src/assets/icons/ibe-icon.png",
+    "icon": "./src/assets/images/ibe-icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./src/assets/icons/ibe-splash-white.png",
+      "image": "./src/assets/images/ibe-splash-white.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ibe2023.ibemobile",
-      "buildNumber": "4" // Internal build number for iOS
+      "buildNumber": "4"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/icons/ibe-adaptive-icon.png",
+        "foregroundImage": "./src/assets/images/ibe-adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.ibe2023.ibemobile",
-      "versionCode": 2 // Internal build number for Android
+      "versionCode": 4,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
@@ -35,6 +45,23 @@
       }
     },
     "owner": "ibe-2023",
-    "plugins": ["expo-localization", "expo-secure-store"]
+    "plugins": [
+      "expo-localization",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#232323",
+          "image": "./src/assets/images/ibe-splash-white.png",
+          "dark": {
+            "image": "./src/assets/images/ibe-splash-white.png",
+            "backgroundColor": "#000000"
+          },
+          "imageWidth": 200
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-asset"
+    ]
   }
 }

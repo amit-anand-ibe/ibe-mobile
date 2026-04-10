@@ -395,6 +395,7 @@ const Login = ({ navigation }) => {
             accessibilityLabel={t("login_password_placeholder")}
           />
           <TouchableOpacity
+            style={styles.iconButton}
             onPress={togglePasswordVisibility}
             accessibilityLabel={
               showPassword ? t("hide_password") : t("show_password")
@@ -475,12 +476,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderRadius: 30,
-    paddingVertical: "4%",
-    paddingHorizontal: "5%",
     marginBottom: "4%",
   },
   password: {
     flex: 1,
+    paddingVertical: "4%",
+    paddingHorizontal: "5%",
+  },
+  iconButton: {
+    paddingHorizontal: 10,
   },
   checkboxContainer: {
     flexDirection: "row",

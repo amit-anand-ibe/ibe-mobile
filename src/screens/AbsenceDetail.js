@@ -910,7 +910,6 @@ const AbsenceDetail = ({ route, navigation }) => {
       );
     } catch (error) {
       console.error("Error in loading absence create detail: ", error);
-    } finally {
     }
   };
 
@@ -1350,7 +1349,11 @@ const AbsenceDetail = ({ route, navigation }) => {
         (isEditMode ? absenceType : true) &&
         itemStatusIDMap && (
           <>
-            <Tab.Navigator screenOptions={{ swipeEnabled: false }}>
+            <Tab.Navigator
+              screenOptions={{
+                swipeEnabled: false,
+              }}
+            >
               <Tab.Screen
                 name={t("general")}
                 options={{

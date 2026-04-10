@@ -17,6 +17,40 @@ import en from "./locales/en.json"; // English language file
 import es from "./locales/es.json"; // Spanish language file
 import hi from "./locales/hi.json"; // Hindi language file
 
+const resources = {
+  en: { translation: en }, // Provide translation resources for English
+  es: { translation: es }, // Provide translation resources for Spanish
+  hi: { translation: hi }, // Provide translation resources for Hindi
+};
+
+export const getSupportedLanguage = (locale) => {
+  if (!locale || typeof locale !== "string") {
+    return "en";
+  }
+
+  const normalizedLocale = locale.toLowerCase();
+  const languageCode = normalizedLocale.split("-")[0];
+
+  if (resources[normalizedLocale]) {
+    return normalizedLocale;
+  }
+
+  return resources[languageCode] ? languageCode : "en";
+};
+
+const getDeviceLanguage = () => {
+  if (typeof Localization.getLocales === "function") {
+    const locales = Localization.getLocales();
+    const primaryLocale = locales?.[0];
+
+    return getSupportedLanguage(
+      primaryLocale?.languageTag || primaryLocale?.languageCode
+    );
+  }
+
+  return getSupportedLanguage(Localization.locale);
+};
+
 /**
  * Initialize i18next with configuration options and language resources.
  */
@@ -24,12 +58,8 @@ i18n
   .use(initReactI18next) // Bind react-i18next to i18next
   .init({
     compatibilityJSON: "v3", // Compatibility JSON format
-    resources: {
-      en: { translation: en }, // Provide translation resources for English
-      es: { translation: es }, // Provide translation resources for Spanish
-      hi: { translation: hi }, // Provide translation resources for Hindi
-    },
-    lng: Localization.locale.split("-")[0], // Set language based on device's locale
+    resources,
+    lng: getDeviceLanguage(), // Set language based on device locale with Expo SDK 54 compatibility
     fallbackLng: "en", // Fallback language if translation for the device's locale is not available
     interpolation: {
       escapeValue: false, // React already escapes strings by default

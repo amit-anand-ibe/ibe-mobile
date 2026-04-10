@@ -4,12 +4,12 @@ import {
   Alert,
   Button,
   Modal,
-  SafeAreaView,
   StyleSheet,
   Switch,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native-gesture-handler";
 import CustomRemotePicker from "../components/CustomRemotePicker";

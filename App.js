@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { RootSiblingParent } from "react-native-root-siblings";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -29,33 +29,33 @@ import OfflineView from "./src/components/offline/OfflineView";
 
 /**
  * Function to get the initial language of the device/platform.
- * @returns {string} The initial language based on the device's platform or from AsyncStorage.
+ * Works for both Expo SDK 52 and 53.
+ * @returns {Promise<string>} The initial language
  */
 const getInitialLanguage = async () => {
   try {
-    // Check AsyncStorage for the preferred language
+    // Check AsyncStorage for preferred language
     const preferredLanguage = await AsyncStorage.getItem("preferredLanguage");
 
     if (preferredLanguage) {
       console.log(`Preferred language from AsyncStorage: ${preferredLanguage}`);
-
-      // If preferred language is available in AsyncStorage, return it
       return preferredLanguage;
-    } else {
-      // Use expo-localization to get the device's locale
-      const locale = Localization.locale.split("-")[0];
-      console.log(`Device locale: ${locale}`);
-
-      // Return the language if available, otherwise fallback to English
-      return locale && i18n.options.resources[locale] ? locale : "en";
     }
-  } catch (error) {
-    console.error(
-      "Error fetching preferred language from AsyncStorage:",
-      error
-    );
 
-    // Fallback to English in case of any errors
+    // Expo 53+ uses getLocales()
+    let locale;
+    if (typeof Localization.getLocales === "function") {
+      const locales = Localization.getLocales();
+      locale = locales && locales.length > 0 ? locales[0].languageCode : "en";
+    } else {
+      // Fallback for Expo 52 (Localization.locale exists here)
+      locale = Localization.locale ? Localization.locale.split("-")[0] : "en";
+    }
+
+    console.log(`Device locale: ${locale}`);
+    return locale && i18n.options.resources[locale] ? locale : "en";
+  } catch (error) {
+    console.error("Error fetching preferred language:", error);
     return "en";
   }
 };
@@ -76,7 +76,7 @@ const App = () => {
         console.log(`Setting initial language: ${initialLanguage}`);
 
         // Set the initial language for the i18n localization library
-        i18n.changeLanguage(initialLanguage);
+        await i18n.changeLanguage(initialLanguage);
       } catch (error) {
         console.error("Error initializing app:", error.message);
       }

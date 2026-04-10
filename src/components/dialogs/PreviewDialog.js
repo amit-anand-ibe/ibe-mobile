@@ -21,8 +21,9 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-import { Video, ResizeMode } from "expo-av";
 import Constants from "expo-constants";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { WebView } from "react-native-webview";
 
 import { screenDimension } from "../../utils/ScreenUtils";
 
@@ -32,11 +33,12 @@ const isRunningInExpoGo = Constants.appOwnership === "expo";
 // Conditionally import react-native-pdf if not in Expo Go
 let Pdf;
 if (!isRunningInExpoGo) {
-  // The react-native-pdf package is a native module, which means it requires native code to work.
-  // Expo Go does not support installing native modules yet. This is why the react-native-pdf package won’t work in the Expo Go app.
-  // We will conditionally run in development build method. If not in Expo Go, conditionally import react-native-pdf.
-  
-  //Pdf = require("react-native-pdf").default; // TODO: Find an alternative package or solution.
+  try {
+    Pdf = require("react-native-pdf").default;
+  } catch (error) {
+    console.warn("react-native-pdf not available:", error);
+    Pdf = null;
+  }
 }
 
 /**
@@ -61,6 +63,9 @@ const PreviewDialog = ({
 
   // State to manage loading state
   const [isLoading, setIsLoading] = useState(true);
+  const videoPlayer = useVideoPlayer(fileUri ? { uri: fileUri } : null, (player) => {
+    player.loop = true;
+  });
 
   // Shared values for animated transformations
   const offset = useSharedValue({ x: 0, y: 0 });
@@ -165,31 +170,50 @@ const PreviewDialog = ({
         </GestureDetector>
       </View>
     );
-  } else if (Pdf && fileType === "pdf" && !isRunningInExpoGo) {
-    content = (
-      <Pdf
-        source={{ uri: fileUri }}
-        style={contentStyle}
-        onLoadComplete={(numberOfPages, filePath) => {
-          console.log(`Number of pages: ${numberOfPages}`);
-        }}
-        onPageChanged={(page, numberOfPages) => {
-          console.log(`Current page: ${page}`);
-        }}
-        onError={(error) => {
-          console.log(error);
-        }}
-      />
-    );
+  } else if (fileType === "pdf") {
+    if (Pdf && !isRunningInExpoGo) {
+      content = (
+        <Pdf
+          source={{ uri: fileUri }}
+          style={contentStyle}
+          onLoadComplete={(numberOfPages, filePath) => {
+            console.log(`Number of pages: ${numberOfPages}`);
+          }}
+          onPageChanged={(page, numberOfPages) => {
+            console.log(`Current page: ${page}`);
+          }}
+          onError={(error) => {
+            console.log(error);
+          }}
+        />
+      );
+    } else {
+      content = (
+        <View style={{ width: contentStyle.width, height: contentStyle.height }}>
+          <WebView
+            originWhitelist={["*"]}
+            source={{ uri: fileUri }}
+            style={{ flex: 1 }}
+            onError={(syntheticEvent) => {
+              const { nativeEvent } = syntheticEvent;
+              console.warn("WebView PDF load error", nativeEvent);
+            }}
+            startInLoadingState
+            renderLoading={() => (
+              <ActivityIndicator size="large" color="#fff" style={{ flex: 1 }} />
+            )}
+          />
+        </View>
+      );
+    }
   } else if (fileType === "video") {
     // Video preview component
     content = (
-      <Video
-        source={{ uri: fileUri }}
+      <VideoView
+        player={videoPlayer}
         style={contentStyle}
-        resizeMode={ResizeMode.CONTAIN}
-        useNativeControls
-        isLooping
+        contentFit="contain"
+        nativeControls
       />
     );
   } else {

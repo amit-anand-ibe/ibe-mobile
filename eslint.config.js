@@ -1,8 +1,8 @@
-import js from "@eslint/js";
-import react from "eslint-plugin-react";
-import babelParser from "@babel/eslint-parser";
+const js = require("@eslint/js");
+const react = require("eslint-plugin-react");
+const babelParser = require("@babel/eslint-parser");
 
-export default [
+module.exports = [
   // Ignore specific files/folders globally
   {
     ignores: [
@@ -51,7 +51,9 @@ export default [
     rules: {
       semi: ["error", "always"],
       quotes: ["error", "double"],
-      "no-unused-vars": "warn",
+      "no-unused-vars": ["warn", { "varsIgnorePattern": "^React$" }],
+      "react/react-in-jsx-scope": "off",
+      "react/jsx-uses-react": "off",
     },
     settings: {
       react: {

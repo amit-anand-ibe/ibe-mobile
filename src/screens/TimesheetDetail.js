@@ -100,7 +100,6 @@ const TimesheetDetail = ({ route, navigation }) => {
     defaultInputDays: "",
     headerCommentRequired: "",
     itemCommentRequired: "",
-    minTimeIncrement: "",
     nonBillableComments: false,
     overtimeAllowed: false,
     validateWorkSchedule: "",
@@ -473,17 +472,17 @@ const TimesheetDetail = ({ route, navigation }) => {
       // Define the fields and conditions for the query
       const queryFields = {
         fields: [
-          `TimeConfType-extID`,
-          `TimeConfType-defaultAsHomeDefault`,
-          `TimeConfType-defaultInputDays`,
-          `TimeConfType-headerCommentRequired`,
-          `TimeConfType-itemCommentRequired`,
-          `TimeConfType-maxTasksPreload`,
-          `TimeConfType-minTimeIncrement`,
-          `TimeConfType-nonBillableComments`,
-          `TimeConfType-overtimeAllowed`,
-          `TimeConfType-validateWorkSchedule`,
-          `TimeConfType-periodSchedules`,
+          "TimeConfType-extID",
+          "TimeConfType-defaultAsHomeDefault",
+          "TimeConfType-defaultInputDays",
+          "TimeConfType-headerCommentRequired",
+          "TimeConfType-itemCommentRequired",
+          "TimeConfType-maxTasksPreload",
+          "TimeConfType-minTimeIncrement",
+          "TimeConfType-nonBillableComments",
+          "TimeConfType-overtimeAllowed",
+          "TimeConfType-validateWorkSchedule",
+          "TimeConfType-periodSchedules",
         ],
         where: [
           {
@@ -534,20 +533,20 @@ const TimesheetDetail = ({ route, navigation }) => {
         if (data) {
           // Extract period schedules and set timesheet type details
           const fetchedPeriodSchedules =
-            data[`TimeConfType-periodSchedules`] || [];
+            data["TimeConfType-periodSchedules"] || [];
           setTimesheetTypeDetails({
             defaultAsHomeDefault:
-              data[`TimeConfType-defaultAsHomeDefault`] || "",
-            defaultInputDays: data[`TimeConfType-defaultInputDays`] || "",
+              data["TimeConfType-defaultAsHomeDefault"] || "",
+            defaultInputDays: data["TimeConfType-defaultInputDays"] || "",
             headerCommentRequired:
-              data[`TimeConfType-headerCommentRequired`] || "",
-            itemCommentRequired: data[`TimeConfType-itemCommentRequired`] || "",
-            minTimeIncrement: data[`TimeConfType-minTimeIncrement`] || "",
+              data["TimeConfType-headerCommentRequired"] || "",
+            itemCommentRequired: data["TimeConfType-itemCommentRequired"] || "",
+            minTimeIncrement: data["TimeConfType-minTimeIncrement"] || "",
             nonBillableComments:
-              data[`TimeConfType-nonBillableComments`] || false,
-            overtimeAllowed: data[`TimeConfType-overtimeAllowed`] || false,
+              data["TimeConfType-nonBillableComments"] || false,
+            overtimeAllowed: data["TimeConfType-overtimeAllowed"] || false,
             validateWorkSchedule:
-              data[`TimeConfType-validateWorkSchedule`] || "",
+              data["TimeConfType-validateWorkSchedule"] || "",
             periodSchedules: fetchedPeriodSchedules,
           });
 
@@ -659,9 +658,9 @@ const TimesheetDetail = ({ route, navigation }) => {
   const getValidPeriodDatesFromPeriodSchedule = async (periodScheduleId) => {
     const queryFields = {
       fields: [
-        `PeriodSchedule-id`,
-        `PeriodSchedule-extID`,
-        `PeriodSchedule-periods`,
+        "PeriodSchedule-id",
+        "PeriodSchedule-extID",
+        "PeriodSchedule-periods",
       ],
       where: [
         {
@@ -1443,8 +1442,7 @@ const TimesheetDetail = ({ route, navigation }) => {
       );
     } catch (error) {
       console.error("Error in loading timesheet create detail: ", error);
-    } finally {
-    }
+    } 
   };
 
   const loadTimesheetDetail = async () => {
@@ -1583,12 +1581,6 @@ const TimesheetDetail = ({ route, navigation }) => {
               `${
                 BUSOBJCATMAP[BUSOBJCAT.TIMESHEET]
               }-type:TimeConfType-validateIncrement`
-            ] || "",
-          minTimeIncrement:
-            data[
-              `${
-                BUSOBJCATMAP[BUSOBJCAT.TIMESHEET]
-              }-type:TimeConfType-minTimeIncrement`
             ] || "",
         });
 

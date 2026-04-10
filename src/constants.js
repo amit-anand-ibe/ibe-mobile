@@ -4,7 +4,7 @@
  * @returns {string} - The current environment (e.g., "development", "testing", "production").
  */
 const determineEnvironment = () => {
-  return "testing";
+  return "production";
 };
 
 /**
@@ -27,7 +27,7 @@ const Environment = {
  * @type {Object.<string, string>}
  */
 const BASE_URL = {
-  [Environment.DEVELOPMENT]: "http:///172.17.0.117",
+  [Environment.DEVELOPMENT]: "http://172.0.0.95",
   [Environment.TESTING]: "https://testserver.ibenv.net",
   [Environment.PRODUCTION]: "https://appnew.ibenv.net",
 };

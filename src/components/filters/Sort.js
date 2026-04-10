@@ -5,8 +5,8 @@ import {
   Button,
   Modal,
   Text,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import CustomPicker from "../CustomPicker";
 import CustomButton from "../CustomButton";
 import {

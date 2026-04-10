@@ -71,7 +71,7 @@ const TimesheetDetailGeneral = ({
   } = employeeInfo;
 
   console.log(
-    `Employee Info Loaded in TimesheetDetailGeneral: `,
+    "Employee Info Loaded in TimesheetDetailGeneral: ",
     JSON.stringify({
       ...employeeInfo,
       nonWorkingDates: `Array of length ${nonWorkingDates.length}`,

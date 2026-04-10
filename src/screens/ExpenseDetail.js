@@ -527,11 +527,11 @@ const ExpenseDetail = ({ route, navigation }) => {
     try {
       const queryFields = {
         fields: [
-          `ExpenseClaimType-extID`,
-          `ExpenseClaimType-defaultAsHomeDefault`,
-          `ExpenseClaimType-allowedExpenseTypes`,
-          `ExpenseClaimType-singleCustomer`,
-          `ExpenseClaimType-singleProject`,
+          "ExpenseClaimType-extID",
+          "ExpenseClaimType-defaultAsHomeDefault",
+          "ExpenseClaimType-allowedExpenseTypes",
+          "ExpenseClaimType-singleCustomer",
+          "ExpenseClaimType-singleProject",
         ],
         where: [
           {
@@ -573,18 +573,18 @@ const ExpenseDetail = ({ route, navigation }) => {
         const data = response.data[0];
 
         if (data) {
-          setExpenseType(data[`ExpenseClaimType-extID`] || "");
+          setExpenseType(data["ExpenseClaimType-extID"] || "");
           setDefaultAsHomeDefault(
-            data[`ExpenseClaimType-defaultAsHomeDefault`] || ""
+            data["ExpenseClaimType-defaultAsHomeDefault"] || ""
           );
           setAllowedExpenseTypes(
-            data[`ExpenseClaimType-allowedExpenseTypes`] || ""
+            data["ExpenseClaimType-allowedExpenseTypes"] || ""
           );
           setExpenseTypeSingleCustomer(
-            data[`ExpenseClaimType-singleCustomer`] || ""
+            data["ExpenseClaimType-singleCustomer"] || ""
           );
           setExpenseTypeSingleProject(
-            data[`ExpenseClaimType-singleProject`] || ""
+            data["ExpenseClaimType-singleProject"] || ""
           );
         }
       } else {
@@ -600,10 +600,10 @@ const ExpenseDetail = ({ route, navigation }) => {
     try {
       const queryFields = {
         fields: [
-          `BusUnit-name-text`,
-          `BusUnit-companySettings-vatRegistered`,
-          `BusUnit-companySettings-baseCurrency`,
-          `BusUnit-companySettings-taxExempt`,
+          "BusUnit-name-text",
+          "BusUnit-companySettings-vatRegistered",
+          "BusUnit-companySettings-baseCurrency",
+          "BusUnit-companySettings-taxExempt",
         ],
         where: [
           {
@@ -645,15 +645,15 @@ const ExpenseDetail = ({ route, navigation }) => {
         const data = response.data[0];
 
         if (data) {
-          setExpenseCompanyName(data[`BusUnit-name-text`] || "");
+          setExpenseCompanyName(data["BusUnit-name-text"] || "");
           setExpenseCompanyIsTaxExempt(
-            data[`BusUnit-companySettings-taxExempt`] || ""
+            data["BusUnit-companySettings-taxExempt"] || ""
           );
           setExpenseCompanyIsVatRegistered(
-            data[`BusUnit-companySettings-vatRegistered`] || ""
+            data["BusUnit-companySettings-vatRegistered"] || ""
           );
-          setBaseCurrency(data[`BusUnit-companySettings-baseCurrency`] || "");
-          setTaxTypes(data[`BusUnit-companySettings-taxTypes`] || "");
+          setBaseCurrency(data["BusUnit-companySettings-baseCurrency"] || "");
+          setTaxTypes(data["BusUnit-companySettings-taxTypes"] || "");
         }
       } else {
         console.error("Unexpected response format or empty data array.");
@@ -689,7 +689,7 @@ const ExpenseDetail = ({ route, navigation }) => {
         APP.LOGIN_USER_EMPLOYEE_ID
       );
       const empCurrency =
-        employeeData[`Resource-financeData-reimbursementCurrency`] || "";
+        employeeData["Resource-financeData-reimbursementCurrency"] || "";
 
       setExpenseCompanyId(loggedInUserInfo.companyId);
       setExpenseEmployeeId(APP.LOGIN_USER_EMPLOYEE_ID);
@@ -724,7 +724,6 @@ const ExpenseDetail = ({ route, navigation }) => {
       );
     } catch (error) {
       console.error("Error in loading expense create detail: ", error);
-    } finally {
     }
   };
 
@@ -1378,7 +1377,11 @@ const ExpenseDetail = ({ route, navigation }) => {
         <Loader />
       ) : (
         <>
-          <Tab.Navigator screenOptions={{ swipeEnabled: false }}>
+          <Tab.Navigator
+            screenOptions={{
+              swipeEnabled: false,
+            }}
+          >
             <Tab.Screen
               name={t("key_info")}
               options={{

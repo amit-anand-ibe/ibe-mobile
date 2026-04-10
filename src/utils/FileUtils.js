@@ -1,6 +1,5 @@
 import { Platform } from "react-native";
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 
 import { fetchAndCacheResource } from "./APIUtils";
@@ -33,7 +32,7 @@ const handleDownload = async (
     console.log("File URI: ", fileUri);
 
     // Create download path
-    downloadPath = await createDownloadPath(item, false);
+    const downloadPath = await createDownloadPath(item, false);
     console.log("Download path: ", downloadPath);
 
     // Download the file
@@ -49,54 +48,13 @@ const handleDownload = async (
     // Reset download progress for the item ID
     resetDownloadProgress(setDownloadProgressMap, item.id);
 
-    // Check if adding to media library is necessary and successful
-    if (
-      item.mimeType.startsWith("image") ||
-      item.mimeType.startsWith("video")
-    ) {
-      const mediaPath = await handleMediaLibraryAccess(downloadPath);
-      if (mediaPath) {
-        console.log(`File added to media at path: ${mediaPath}`);
+    // Save via SAF on Android or share sheet on iOS to avoid broad media permissions.
+    const shareResult = await shareAndDelete(downloadPath, item, translation);
 
-        // Show a message indicating successful download with the actual media path
-        showToast(
-          `${item.name}\n${translation("file_download_success_media_access")}`
-        );
-
-        // Delete the file from the download path
-        await FileSystem.deleteAsync(downloadPath);
-        console.log("File deleted successfully: ", downloadPath);
-      } else {
-        // Show error message
-        showToast(
-          `${item.name}\n${translation("file_download_error_media_access")}`,
-          "error"
-        );
-      }
+    if (shareResult) {
+      showToast(`${item.name}\n${translation("file_download_success")}`);
     } else {
-      // If it's not an image, share the file with the user and delete it afterwards
-      // This is a workaround as accessing file system from expo is not allowed yet.
-      // On Android, we utilize the Storage Access Framework (SAF) to request directory permissions
-      // and save the downloaded file to the specified directory if permissions are granted.
-      // If permissions are not granted, we fall back to sharing the downloaded file.
-      // On iOS, Expo Sharing is utilized to allow the user to save or share the file.
-      const shareResult = await shareAndDelete(downloadPath, item, translation);
-
-      if (shareResult) {
-        // show a message indicating successful download
-        showToast(
-          `${item.name}\n${translation(
-            "file_download_success"
-          )}\nor\n${translation("sharing_failed")}`,
-          "warning"
-        );
-      } else {
-        // Show error message
-        showToast(
-          `${item.name}\n${translation("file_download_error")}`,
-          "error"
-        );
-      }
+      showToast(`${item.name}\n${translation("file_download_error")}`, "error");
     }
   } catch (error) {
     // Handle any errors that occur during the download process
@@ -133,9 +91,7 @@ const createDownloadPath = async (item) => {
   } catch (error) {
     // Handle errors
     console.error("Error in creating download path: ", error);
-    throw new Error(
-      "Unable to create download path or add file to media library."
-    );
+    throw new Error("Unable to create download path.");
   }
 };
 
@@ -204,45 +160,6 @@ const downloadCallback = (
     ...prevProgressMap,
     [fileId]: progressPercentage,
   }));
-};
-
-/**
- * Handles access to the media library by adding the downloaded file to it.
- * @param {string} downloadPath - The path of the downloaded file.
- * @returns {string|null} The URI of the added asset in the media library, or null if there's an error.
- */
-const handleMediaLibraryAccess = async (downloadPath) => {
-  try {
-    // Check if permission to access media library is granted
-    let mediaLibraryPermission = await MediaLibrary.getPermissionsAsync();
-    if (!mediaLibraryPermission.granted) {
-      // If permission is not granted, request permission
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== "granted") {
-        console.warn("Permission to access media library is required.");
-        return null;
-      }
-    }
-
-    // Encode the download path to handle spaces
-    const encodedPath = encodeURI(downloadPath);
-
-    // Check if the file exists at the specified path
-    const fileInfo = await FileSystem.getInfoAsync(encodedPath);
-    if (!fileInfo.exists) {
-      throw new Error("File does not exist at the specified path.");
-    }
-
-    // Add the downloaded file to the media library
-    const asset = await MediaLibrary.createAssetAsync(encodedPath);
-
-    console.log("Asset created successfully:", JSON.stringify(asset));
-
-    return asset.uri; // Return the media path
-  } catch (error) {
-    console.error("Error in creating asset in media library: ", error);
-    return null; // Return null if there's an error
-  }
 };
 
 /**
