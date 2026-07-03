@@ -71,6 +71,8 @@ const File = ({
   const [previewFileTitle, setPreviewFileTitle] = useState("");
   const [previewFileType, setPreviewFileType] = useState(null);
   const [previewFileUri, setPreviewFileUri] = useState(null);
+  const [previewFileName, setPreviewFileName] = useState("");
+  const [previewFileMimeType, setPreviewFileMimeType] = useState("");
 
   const maxUploadFileSizeInBytes = MAX_UPLOAD_FILE_SIZE * 1024 * 1024; // MAX_UPLOAD_FILE_SIZE in bytes
 
@@ -533,6 +535,8 @@ const File = ({
     setPreviewFileTitle("");
     setPreviewFileType(null);
     setPreviewFileUri(null);
+    setPreviewFileName("");
+    setPreviewFileMimeType("");
     setIsPreviewModalVisible(false);
   };
 
@@ -698,6 +702,8 @@ const File = ({
                 setPreviewFileType,
                 setPreviewFileUri,
                 setPreviewFileTitle,
+                setPreviewFileName,
+                setPreviewFileMimeType,
                 t
               )
             }
@@ -869,6 +875,8 @@ const File = ({
         fileUri={previewFileUri}
         fileType={previewFileType}
         fileTitle={previewFileTitle}
+        fileName={previewFileName}
+        fileMimeType={previewFileMimeType}
         onClose={onClosePreview}
       />
       <View style={styles.header}>

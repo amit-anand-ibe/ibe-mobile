@@ -113,7 +113,9 @@ const GuidanceNote = ({ text, variant = "info" }) => {
   const isWarning = variant === "warning";
 
   return (
-    <View style={[styles.guidanceNote, isWarning && styles.guidanceNoteWarning]}>
+    <View
+      style={[styles.guidanceNote, isWarning && styles.guidanceNoteWarning]}
+    >
       <Ionicons
         name={isWarning ? "alert-circle-outline" : "information-circle-outline"}
         size={16}
@@ -425,6 +427,8 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
   const [reviewPreviewUri, setReviewPreviewUri] = useState(null);
   const [reviewPreviewType, setReviewPreviewType] = useState(null);
   const [reviewPreviewTitle, setReviewPreviewTitle] = useState("");
+  const [reviewPreviewName, setReviewPreviewName] = useState("");
+  const [reviewPreviewMimeType, setReviewPreviewMimeType] = useState("");
   const [viewedReviewItemIds, setViewedReviewItemIds] = useState([]);
   const [customerSignOffName, setCustomerSignOffName] = useState("");
   const [signaturePaths, setSignaturePaths] = useState([]);
@@ -474,8 +478,7 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
   );
   const workPhotosRequired = requiredWorkPhotoCount > 0;
   const isChecklistComplete =
-    !checklistRequired ||
-    (hasChecklistItems && incompleteRequiredCount === 0);
+    !checklistRequired || (hasChecklistItems && incompleteRequiredCount === 0);
   const hasRequiredWorkPhotos =
     executionState.photos.length >= requiredWorkPhotoCount;
   const completionPrerequisitesMet =
@@ -491,8 +494,7 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
   const reviewItems = task.customerReviewItems || [];
   const reviewRequired = !!fieldServicePolicy.customerReviewRequired;
   const reviewConfigurationMissing = reviewRequired && reviewItems.length === 0;
-  const hasRequiredReviewItems =
-    reviewRequired && reviewItems.length > 0;
+  const hasRequiredReviewItems = reviewRequired && reviewItems.length > 0;
   const requiredReviewItems = reviewItems.filter((item) => item.required);
   const unviewedRequiredReviewItems = requiredReviewItems.filter(
     (item) => !viewedReviewItemIds.includes(item.id)
@@ -526,8 +528,8 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
     reviewConfigurationMissing
       ? t("field_engineer_review_configuration_missing")
       : hasRequiredReviewItems && !reviewAcknowledgement
-      ? t("field_engineer_completion_review_required")
-      : "",
+        ? t("field_engineer_completion_review_required")
+        : "",
   ].filter(Boolean);
 
   const headerLeft = useCallback(
@@ -747,7 +749,10 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
 
     if (reviewConfigurationMissing) {
       messages.push(t("field_engineer_review_configuration_missing"));
-    } else if (hasRequiredReviewItems && !executionState.reviewAcknowledgement) {
+    } else if (
+      hasRequiredReviewItems &&
+      !executionState.reviewAcknowledgement
+    ) {
       messages.push(t("field_engineer_completion_review_required"));
     }
 
@@ -805,6 +810,12 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
     setViewedReviewItemIds((currentIds) =>
       currentIds.includes(item.id) ? currentIds : [...currentIds, item.id]
     );
+
+    if (!item.content && (item.url || item.resourceId)) {
+      openReviewDocument(item);
+      return;
+    }
+
     setReviewModalItem(item);
   };
 
@@ -836,7 +847,9 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
     );
 
     if (!uploadedSignature?.attachmentId) {
-      throw new Error("Customer signature upload did not return an attachment id");
+      throw new Error(
+        "Customer signature upload did not return an attachment id"
+      );
     }
 
     const signatureAttachmentInfo = await fetchAttachmentResourceInfo(
@@ -876,7 +889,9 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
 
   const getStatusHistoryRecordedByName = (entry = {}) => {
     if (entry.recordedByName || entry.userName || entry.recordedByDisplayName) {
-      return entry.recordedByName || entry.userName || entry.recordedByDisplayName;
+      return (
+        entry.recordedByName || entry.userName || entry.recordedByDisplayName
+      );
     }
 
     const collectorId = getCollectorId();
@@ -943,7 +958,10 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
               });
               showToast(t("field_engineer_review_acknowledgement_saved"));
             } catch (error) {
-              console.error("Error saving customer review acknowledgement:", error);
+              console.error(
+                "Error saving customer review acknowledgement:",
+                error
+              );
               showToast(
                 t("field_engineer_review_acknowledgement_save_failed"),
                 "error"
@@ -957,7 +975,9 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
 
   const validateReviewAcknowledgementForSignOff = () => {
     if (reviewConfigurationMissing) {
-      setSignOffValidationMessage(t("field_engineer_review_configuration_missing"));
+      setSignOffValidationMessage(
+        t("field_engineer_review_configuration_missing")
+      );
       return false;
     }
 
@@ -1305,7 +1325,8 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
       setExecutionState((currentState) => ({
         ...currentState,
         currentStatus: updatedTask.status || newStatus,
-        statusHistory: updatedTask.statusHistory || currentState.statusHistory || [],
+        statusHistory:
+          updatedTask.statusHistory || currentState.statusHistory || [],
       }));
       setStatusSheetVisible(false);
       setSelectedStatus("");
@@ -1442,17 +1463,31 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
     return "";
   };
 
-  const previewReviewDocument = (fileUri, item = {}, mimeType = "") => {
-    const previewType = getReviewPreviewType(mimeType, item);
-
-    if (!fileUri || !previewType) {
+  const previewReviewDocument = (
+    fileUri,
+    item = {},
+    mimeType = "",
+    fileName = ""
+  ) => {
+    if (!fileUri) {
       setReviewDocumentMessage(t("field_engineer_review_open_unavailable"));
       return;
     }
 
+    let previewType = getReviewPreviewType(mimeType, item);
+    if (!previewType) {
+      previewType = "unsupported";
+    }
+
     setReviewPreviewUri(fileUri);
     setReviewPreviewType(previewType);
-    setReviewPreviewTitle(item?.title || t("field_engineer_open_review_document"));
+    setReviewPreviewTitle(
+      item?.title || t("field_engineer_open_review_document")
+    );
+    setReviewPreviewName(
+      fileName || item?.title || t("field_engineer_open_review_document")
+    );
+    setReviewPreviewMimeType(mimeType || item?.mimeType || "");
     setIsReviewPreviewVisible(true);
   };
 
@@ -1461,6 +1496,8 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
     setReviewPreviewUri(null);
     setReviewPreviewType(null);
     setReviewPreviewTitle("");
+    setReviewPreviewName("");
+    setReviewPreviewMimeType("");
   };
 
   const openReviewDocument = async (item) => {
@@ -1473,7 +1510,9 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
       }
 
       if (item.resourceId) {
-        const attachmentInfo = await fetchAttachmentResourceInfo(item.resourceId);
+        const attachmentInfo = await fetchAttachmentResourceInfo(
+          item.resourceId
+        );
 
         if (attachmentInfo?.original) {
           const originalCachedPath = await fetchAndCacheResource(
@@ -1484,7 +1523,8 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
             previewReviewDocument(
               originalCachedPath,
               item,
-              attachmentInfo.mimeType
+              attachmentInfo.mimeType,
+              attachmentInfo.fileName || item?.title
             );
             return;
           }
@@ -1499,7 +1539,7 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
         }
 
         if (cachedPath) {
-          previewReviewDocument(cachedPath, item, item.mimeType);
+          previewReviewDocument(cachedPath, item, item.mimeType, item?.title);
           return;
         }
       }
@@ -1731,9 +1771,15 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
                 onPress={recordReviewAcknowledgement}
                 activeOpacity={0.78}
                 accessibilityRole="button"
-                accessibilityLabel={t("field_engineer_record_review_acknowledgement")}
+                accessibilityLabel={t(
+                  "field_engineer_record_review_acknowledgement"
+                )}
               >
-                <Ionicons name="checkmark-circle-outline" size={20} color="#005eb8" />
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={20}
+                  color="#005eb8"
+                />
                 <Text style={styles.secondaryActionButtonText}>
                   {t("field_engineer_record_review_acknowledgement")}
                 </Text>
@@ -1743,77 +1789,77 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
         )}
 
         {showChecklistSection && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitleNoMargin}>
-              {t("field_engineer_checklist")}
-            </Text>
-            {hasChecklistItems && (
-              <Text style={styles.sectionCount}>
-                {t("field_engineer_checklist_progress", {
-                  completed: checklistCompletedCount,
-                  total: checklistTotalCount,
-                })}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitleNoMargin}>
+                {t("field_engineer_checklist")}
               </Text>
+              {hasChecklistItems && (
+                <Text style={styles.sectionCount}>
+                  {t("field_engineer_checklist_progress", {
+                    completed: checklistCompletedCount,
+                    total: checklistTotalCount,
+                  })}
+                </Text>
+              )}
+            </View>
+            {isExecutionEvidenceLocked && (
+              <GuidanceNote
+                text={t("field_engineer_checklist_locked_after_signoff")}
+              />
+            )}
+            {hasChecklistItems ? (
+              executionState.checklist.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[
+                    styles.checklistRow,
+                    isExecutionEvidenceLocked && styles.lockedChecklistRow,
+                  ]}
+                  onPress={() => toggleChecklistItem(item.id)}
+                  disabled={isExecutionEvidenceLocked}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{
+                    checked: item.completed,
+                    disabled: isExecutionEvidenceLocked,
+                  }}
+                >
+                  <Checkbox
+                    value={item.completed}
+                    onValueChange={() => toggleChecklistItem(item.id)}
+                    color={item.completed ? "#005eb8" : undefined}
+                    style={styles.checklistCheckbox}
+                    disabled={isExecutionEvidenceLocked}
+                  />
+                  <View style={styles.checklistTextContainer}>
+                    <Text
+                      style={[
+                        styles.checklistLabel,
+                        item.completed && styles.checklistLabelCompleted,
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                    {!!item.helpText && (
+                      <Text style={styles.checklistHelpText}>
+                        {item.helpText}
+                      </Text>
+                    )}
+                    {item.required && (
+                      <Text style={styles.requiredText}>
+                        {t("field_engineer_required")}
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <GuidanceNote
+                text={t("field_engineer_checklist_required_missing")}
+                variant="warning"
+              />
             )}
           </View>
-          {isExecutionEvidenceLocked && (
-            <GuidanceNote
-              text={t("field_engineer_checklist_locked_after_signoff")}
-            />
-          )}
-          {hasChecklistItems ? (
-            executionState.checklist.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={[
-                  styles.checklistRow,
-                  isExecutionEvidenceLocked && styles.lockedChecklistRow,
-                ]}
-                onPress={() => toggleChecklistItem(item.id)}
-                disabled={isExecutionEvidenceLocked}
-                accessibilityRole="checkbox"
-                accessibilityState={{
-                  checked: item.completed,
-                  disabled: isExecutionEvidenceLocked,
-                }}
-              >
-                <Checkbox
-                  value={item.completed}
-                  onValueChange={() => toggleChecklistItem(item.id)}
-                  color={item.completed ? "#005eb8" : undefined}
-                  style={styles.checklistCheckbox}
-                  disabled={isExecutionEvidenceLocked}
-                />
-                <View style={styles.checklistTextContainer}>
-                  <Text
-                    style={[
-                      styles.checklistLabel,
-                      item.completed && styles.checklistLabelCompleted,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {!!item.helpText && (
-                    <Text style={styles.checklistHelpText}>
-                      {item.helpText}
-                    </Text>
-                  )}
-                  {item.required && (
-                    <Text style={styles.requiredText}>
-                      {t("field_engineer_required")}
-                    </Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <GuidanceNote
-              text={t("field_engineer_checklist_required_missing")}
-              variant="warning"
-            />
-          )}
-        </View>
         )}
 
         <View style={styles.section}>
@@ -1865,7 +1911,9 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
             ]}
             onPress={captureWorkPhoto}
             disabled={
-              !canCaptureWorkPhoto || isCapturingPhoto || isExecutionEvidenceLocked
+              !canCaptureWorkPhoto ||
+              isCapturingPhoto ||
+              isExecutionEvidenceLocked
             }
             activeOpacity={0.78}
             accessibilityRole="button"
@@ -1905,7 +1953,8 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
                   <TouchableOpacity
                     style={[
                       styles.deletePhotoButton,
-                      isExecutionEvidenceLocked && styles.deletePhotoButtonDisabled,
+                      isExecutionEvidenceLocked &&
+                        styles.deletePhotoButtonDisabled,
                     ]}
                     onPress={() => confirmDeletePhoto(photo)}
                     disabled={isExecutionEvidenceLocked}
@@ -1928,119 +1977,121 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
         </View>
 
         {showSignOffSection && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitleNoMargin}>
-              {t("field_engineer_customer_signoff")}
-            </Text>
-            <View
-              style={[
-                styles.signOffStatusPill,
-                signOff ? styles.signOffSignedPill : styles.signOffMissingPill,
-              ]}
-            >
-              <Text
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitleNoMargin}>
+                {t("field_engineer_customer_signoff")}
+              </Text>
+              <View
                 style={[
-                  styles.signOffStatusText,
+                  styles.signOffStatusPill,
                   signOff
-                    ? styles.signOffSignedText
-                    : styles.signOffMissingText,
+                    ? styles.signOffSignedPill
+                    : styles.signOffMissingPill,
                 ]}
               >
-                {signOff
-                  ? signOff.type === "skipped"
-                    ? t("field_engineer_signoff_skipped")
-                    : t("field_engineer_signoff_signed")
-                  : t("field_engineer_signoff_not_signed")}
-              </Text>
+                <Text
+                  style={[
+                    styles.signOffStatusText,
+                    signOff
+                      ? styles.signOffSignedText
+                      : styles.signOffMissingText,
+                  ]}
+                >
+                  {signOff
+                    ? signOff.type === "skipped"
+                      ? t("field_engineer_signoff_skipped")
+                      : t("field_engineer_signoff_signed")
+                    : t("field_engineer_signoff_not_signed")}
+                </Text>
+              </View>
             </View>
+            <GuidanceNote text={t("field_engineer_customer_signoff_help")} />
+            {isExecutionEvidenceLocked && (
+              <GuidanceNote text={t("field_engineer_signoff_update_help")} />
+            )}
+            {reviewItems.length > 0 && (
+              <View style={styles.reviewSummary}>
+                <Text style={styles.detailLabel}>
+                  {t("field_engineer_customer_review")}
+                </Text>
+                <Text style={styles.detailValue}>
+                  {reviewAcknowledgement
+                    ? t("field_engineer_review_acknowledged_on", {
+                        date: formatDateTime(reviewAcknowledgement.timestamp),
+                      })
+                    : hasRequiredReviewItems
+                      ? t("field_engineer_review_required")
+                      : t("field_engineer_review_optional")}
+                </Text>
+              </View>
+            )}
+            {!!signOff && (
+              <View style={styles.signOffSummary}>
+                <DetailRow
+                  label={t("field_engineer_customer_name")}
+                  value={signOff.customerName}
+                />
+                <DetailRow
+                  label={t("field_engineer_signature_timestamp")}
+                  value={formatDateTime(signOff.timestamp)}
+                />
+                <DetailRow
+                  label={t("field_engineer_skip_reason")}
+                  value={signOff.reason}
+                />
+                {signOff.type === "signed" &&
+                  (signOff.signaturePaths?.length || signOff.signatureUri) && (
+                    <View style={styles.signaturePreview}>
+                      {signOff.signaturePaths?.length ? (
+                        <Svg width="100%" height="120" viewBox="0 0 320 180">
+                          {signOff.signaturePaths.map((path, index) => (
+                            <Path
+                              key={`saved-signature-${index}`}
+                              d={getSignaturePathData(path)}
+                              fill="none"
+                              stroke="#111827"
+                              strokeWidth={3}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          ))}
+                        </Svg>
+                      ) : (
+                        <Image
+                          source={{ uri: signOff.signatureUri }}
+                          style={styles.signatureImagePreview}
+                          resizeMode="contain"
+                        />
+                      )}
+                    </View>
+                  )}
+              </View>
+            )}
+            {!canCollectSignOff && signOffPrerequisiteMessages.length > 0 && (
+              <GuidanceNote
+                text={signOffPrerequisiteMessages.join("\n")}
+                variant="warning"
+              />
+            )}
+            <TouchableOpacity
+              style={[
+                styles.secondaryActionButton,
+                canCollectSignOff && styles.tappableCard,
+                !canCollectSignOff && styles.actionButtonDisabled,
+              ]}
+              onPress={openSignOff}
+              disabled={!canCollectSignOff}
+              activeOpacity={0.78}
+              accessibilityRole="button"
+              accessibilityLabel={signOffActionLabel}
+            >
+              <Ionicons name="create-outline" size={20} color="#005eb8" />
+              <Text style={styles.secondaryActionButtonText}>
+                {signOffActionLabel}
+              </Text>
+            </TouchableOpacity>
           </View>
-          <GuidanceNote text={t("field_engineer_customer_signoff_help")} />
-          {isExecutionEvidenceLocked && (
-            <GuidanceNote text={t("field_engineer_signoff_update_help")} />
-          )}
-          {reviewItems.length > 0 && (
-            <View style={styles.reviewSummary}>
-              <Text style={styles.detailLabel}>
-                {t("field_engineer_customer_review")}
-              </Text>
-              <Text style={styles.detailValue}>
-                {reviewAcknowledgement
-                  ? t("field_engineer_review_acknowledged_on", {
-                      date: formatDateTime(reviewAcknowledgement.timestamp),
-                    })
-                  : hasRequiredReviewItems
-                    ? t("field_engineer_review_required")
-                    : t("field_engineer_review_optional")}
-              </Text>
-            </View>
-          )}
-          {!!signOff && (
-            <View style={styles.signOffSummary}>
-              <DetailRow
-                label={t("field_engineer_customer_name")}
-                value={signOff.customerName}
-              />
-              <DetailRow
-                label={t("field_engineer_signature_timestamp")}
-                value={formatDateTime(signOff.timestamp)}
-              />
-              <DetailRow
-                label={t("field_engineer_skip_reason")}
-                value={signOff.reason}
-              />
-              {signOff.type === "signed" &&
-                (signOff.signaturePaths?.length || signOff.signatureUri) && (
-                  <View style={styles.signaturePreview}>
-                    {signOff.signaturePaths?.length ? (
-                      <Svg width="100%" height="120" viewBox="0 0 320 180">
-                        {signOff.signaturePaths.map((path, index) => (
-                          <Path
-                            key={`saved-signature-${index}`}
-                            d={getSignaturePathData(path)}
-                            fill="none"
-                            stroke="#111827"
-                            strokeWidth={3}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        ))}
-                      </Svg>
-                    ) : (
-                      <Image
-                        source={{ uri: signOff.signatureUri }}
-                        style={styles.signatureImagePreview}
-                        resizeMode="contain"
-                      />
-                    )}
-                  </View>
-              )}
-            </View>
-          )}
-          {!canCollectSignOff && signOffPrerequisiteMessages.length > 0 && (
-            <GuidanceNote
-              text={signOffPrerequisiteMessages.join("\n")}
-              variant="warning"
-            />
-          )}
-          <TouchableOpacity
-            style={[
-              styles.secondaryActionButton,
-              canCollectSignOff && styles.tappableCard,
-              !canCollectSignOff && styles.actionButtonDisabled,
-            ]}
-            onPress={openSignOff}
-            disabled={!canCollectSignOff}
-            activeOpacity={0.78}
-            accessibilityRole="button"
-            accessibilityLabel={signOffActionLabel}
-          >
-            <Ionicons name="create-outline" size={20} color="#005eb8" />
-            <Text style={styles.secondaryActionButtonText}>
-              {signOffActionLabel}
-            </Text>
-          </TouchableOpacity>
-        </View>
         )}
 
         <View style={styles.section}>
@@ -2291,7 +2342,6 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
                 )}
               </View>
 
-
               {!!signOffValidationMessage && (
                 <View style={styles.inlineValidationBox}>
                   <Ionicons
@@ -2501,6 +2551,8 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
         fileUri={reviewPreviewUri}
         fileType={reviewPreviewType}
         fileTitle={reviewPreviewTitle}
+        fileName={reviewPreviewName}
+        fileMimeType={reviewPreviewMimeType}
         onClose={closeReviewPreview}
       />
 

@@ -269,6 +269,8 @@ const handlePreview = async (
   setPreviewFileType,
   setPreviewFileUri,
   setPreviewFileTitle,
+  setPreviewFileName,
+  setPreviewFileMimeType,
   translation
 ) => {
   try {
@@ -293,6 +295,8 @@ const handlePreview = async (
     // Set the modal visible initially
     setIsPreviewModalVisible(true);
     setPreviewFileTitle(item.name);
+    setPreviewFileName(item.name || item.fileName || item.title || "");
+    setPreviewFileMimeType(item.mimeType || "");
 
     if (item["newlyAddedFileLocalUri"]) {
       setPreviewFileUri(item["newlyAddedFileLocalUri"]);

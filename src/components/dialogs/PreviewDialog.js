@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Button,
   Modal,
-  View,
-  ScrollView,
   StyleSheet,
   Text,
   ActivityIndicator,
+  View,
+  TouchableOpacity,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system/legacy";
+import { Ionicons } from "@expo/vector-icons";
 
 import {
   Gesture,
@@ -21,9 +25,8 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-import { Video, ResizeMode } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
 import Constants from "expo-constants";
-import { WebView } from "react-native-webview";
 
 import { screenDimension } from "../../utils/ScreenUtils";
 
@@ -33,12 +36,10 @@ const isRunningInExpoGo = Constants.appOwnership === "expo";
 // Conditionally import react-native-pdf if not in Expo Go
 let Pdf;
 if (!isRunningInExpoGo) {
-  try {
-    Pdf = require("react-native-pdf").default;
-  } catch (error) {
-    console.warn("react-native-pdf not available:", error);
-    Pdf = null;
-  }
+  // The react-native-pdf package is a native module, which means it requires native code to work.
+  // Expo Go does not support installing native modules yet. This is why the react-native-pdf package won’t work in the Expo Go app.
+  // We will conditionally run in development build method. If not in Expo Go, conditionally import react-native-pdf.
+  //Pdf = require("react-native-pdf").default; // TODO: Find an alternative package or solution.
 }
 
 /**
@@ -56,6 +57,8 @@ const PreviewDialog = ({
   fileUri,
   fileType,
   fileTitle,
+  fileName,
+  fileMimeType,
   onClose,
 }) => {
   // Initialize useTranslation hook
@@ -63,6 +66,9 @@ const PreviewDialog = ({
 
   // State to manage loading state
   const [isLoading, setIsLoading] = useState(true);
+  const videoPlayer = useVideoPlayer(fileUri ? { uri: fileUri } : null, (player) => {
+    player.loop = true;
+  });
 
   // Shared values for animated transformations
   const offset = useSharedValue({ x: 0, y: 0 });
@@ -93,6 +99,33 @@ const PreviewDialog = ({
     savedScale.value = 1;
     rotation.value = 0;
     savedRotation.value = 0;
+  };
+
+  const getFileExtensionFromMimeType = (mimeType) => {
+    const normalized = String(mimeType || "").toLowerCase();
+    if (normalized.includes("pdf")) return "pdf";
+    if (normalized.includes("msword") || normalized.includes("word"))
+      return "doc";
+    if (normalized.includes("officedocument.wordprocessingml")) return "docx";
+    if (normalized.includes("excel")) return "xlsx";
+    if (normalized.includes("powerpoint")) return "pptx";
+    if (normalized.includes("image/jpeg")) return "jpg";
+    if (normalized.includes("image/png")) return "png";
+    if (normalized.includes("image/gif")) return "gif";
+    if (normalized.includes("text/plain")) return "txt";
+    if (normalized.includes("zip")) return "zip";
+    return "";
+  };
+
+  const ensureFileNameHasExtension = (name, mimeType) => {
+    const fallbackName = String(name || "document").trim();
+    const sanitized = fallbackName.replace(/[^a-zA-Z0-9._-]/g, "_");
+    if (sanitized.includes(".")) {
+      return sanitized;
+    }
+
+    const extension = getFileExtensionFromMimeType(mimeType);
+    return extension ? `${sanitized}.${extension}` : sanitized;
   };
 
   // Gesture handlers for drag, zoom, and rotate
@@ -148,11 +181,47 @@ const PreviewDialog = ({
     };
   }, [fileUri]);
 
+  const handleDownloadPress = async () => {
+    if (!fileUri) {
+      return;
+    }
+
+    try {
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert(t("download_file"), t("preview_download_unavailable"));
+        return;
+      }
+
+      const requestedFileName = ensureFileNameHasExtension(
+        fileName || fileTitle || "document",
+        fileMimeType
+      );
+
+      const destinationUri = `${FileSystem.cacheDirectory}${requestedFileName}`;
+
+      const destinationInfo = await FileSystem.getInfoAsync(destinationUri);
+      if (destinationInfo.exists) {
+        await FileSystem.deleteAsync(destinationUri, { idempotent: true });
+      }
+
+      await FileSystem.copyAsync({ from: fileUri, to: destinationUri });
+
+      await Sharing.shareAsync(destinationUri, {
+        dialogTitle: t("download_file"),
+        mimeType: fileMimeType || undefined,
+      });
+    } catch (error) {
+      console.error("Error sharing file: ", error);
+      Alert.alert(t("sharing_failed"), error?.message || t("sharing_failed"));
+    }
+  };
+
   // Render content based on file type
   let content;
   let contentStyle = {
-    width: screenDimension.width - 20,
-    height: "100%",
+    width: screenDimension.width - 40,
+    height: screenDimension.height * 0.68,
   };
 
   if (fileType === "image") {
@@ -167,56 +236,47 @@ const PreviewDialog = ({
         </GestureDetector>
       </View>
     );
-  } else if (fileType === "pdf") {
-    if (Pdf && !isRunningInExpoGo) {
-      content = (
-        <Pdf
-          source={{ uri: fileUri }}
-          style={contentStyle}
-          onLoadComplete={(numberOfPages, filePath) => {
-            console.log(`Number of pages: ${numberOfPages}`);
-          }}
-          onPageChanged={(page, numberOfPages) => {
-            console.log(`Current page: ${page}`);
-          }}
-          onError={(error) => {
-            console.log(error);
-          }}
-        />
-      );
-    } else {
-      content = (
-        <View style={{ width: contentStyle.width, height: contentStyle.height }}>
-          <WebView
-            originWhitelist={["*"]}
-            source={{ uri: fileUri }}
-            style={{ flex: 1 }}
-            onError={(syntheticEvent) => {
-              const { nativeEvent } = syntheticEvent;
-              console.warn("WebView PDF load error", nativeEvent);
-            }}
-            startInLoadingState
-            renderLoading={() => (
-              <ActivityIndicator size="large" color="#fff" style={{ flex: 1 }} />
-            )}
-          />
-        </View>
-      );
-    }
+  } else if (Pdf && fileType === "pdf" && !isRunningInExpoGo) {
+    content = (
+      <Pdf
+        source={{ uri: fileUri }}
+        style={contentStyle}
+        onLoadComplete={(numberOfPages) => {
+          console.log(`Number of pages: ${numberOfPages}`);
+        }}
+        onPageChanged={(page) => {
+          console.log(`Current page: ${page}`);
+        }}
+        onError={(error) => {
+          console.log(error);
+        }}
+      />
+    );
   } else if (fileType === "video") {
     // Video preview component
     content = (
-      <Video
-        source={{ uri: fileUri }}
+      <VideoView
+        player={videoPlayer}
         style={contentStyle}
-        resizeMode={ResizeMode.CONTAIN}
-        useNativeControls
-        isLooping
+        contentFit="contain"
+        nativeControls
       />
     );
   } else {
     content = (
-      <Text style={styles.errorText}>{t("unsupported_file_type")}</Text>
+      <View style={styles.unsupportedContainer}>
+        <Text style={styles.errorText}>{t("unsupported_file_type")}</Text>
+        <Text style={styles.helpText}>{t("unsupported_file_type_help")}</Text>
+        {fileUri ? (
+          <View style={styles.downloadActionRow}>
+            <Button
+              title={t("download_file")}
+              onPress={handleDownloadPress}
+              color="#2563eb"
+            />
+          </View>
+        ) : null}
+      </View>
     );
   }
 
@@ -227,18 +287,26 @@ const PreviewDialog = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.previewDialogContainer}>
-        <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
-          {fileTitle}
-        </Text>
-        <ScrollView contentContainerStyle={styles.scrollView} centerContent>
-          {isLoading ? (
-            <ActivityIndicator size="large" color="#fff" />
-          ) : (
-            <GestureHandlerRootView>{content}</GestureHandlerRootView>
-          )}
-        </ScrollView>
-        <Button title={t("close")} onPress={onClose} />
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.previewHeader}>
+            <Text style={styles.headerTitle} numberOfLines={2} ellipsizeMode="tail">
+              {fileTitle}
+            </Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Ionicons name="close" size={22} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.previewContent}>
+            {isLoading ? (
+              <ActivityIndicator size="large" color="#fff" />
+            ) : (
+              <GestureHandlerRootView style={styles.previewContentInner}>
+                {content}
+              </GestureHandlerRootView>
+            )}
+          </View>
+        </View>
       </View>
     </Modal>
   );
@@ -246,27 +314,100 @@ const PreviewDialog = ({
 
 const styles = StyleSheet.create({
   errorText: {
-    color: "red",
-    fontSize: 18,
+    color: "#f8fafc",
+    fontSize: 17,
     fontWeight: "bold",
+    textAlign: "center",
   },
-  previewDialogContainer: {
+  overlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(0, 0, 0, 0.88)",
     padding: 10,
+  },
+  container: {
+    width: "100%",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  previewHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.15)",
+    paddingBottom: 10,
+    marginBottom: 14,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "white",
+    flex: 1,
+    marginRight: 12,
+  },
+  previewContent: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  previewContentInner: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
   },
-  scrollView: {
-    flexGrow: 1,
+  unsupportedContainer: {
+    width: screenDimension.width - 60,
+    backgroundColor: "#1f2937",
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 22,
     alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 10,
+  },
+  helpText: {
+    marginTop: 12,
+    color: "#cbd5e1",
+    textAlign: "center",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  downloadActionRow: {
+    marginTop: 24,
+    width: "100%",
+    alignItems: "center",
+  },
+  actionButton: {
+    width: "100%",
+    backgroundColor: "#2563eb",
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  actionButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.8,
   },
 });
 
