@@ -1,5 +1,13 @@
-import React, { useCallback, useEffect, useMemo } from "react"; // React and hooks
-import { View, Text, TouchableOpacity } from "react-native";
+/* global require */
+
+import React, { useCallback, useEffect, useMemo, useState } from "react"; // React and hooks
+import {
+  Pressable,
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,9 +22,12 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { fetchAndCacheResource } from "../utils/APIUtils";
+import {
+  fetchFieldEngineerTasks,
+  hasFieldEngineerRole,
+} from "../utils/FieldEngineerUtils";
 import { screenDimension } from "../utils/ScreenUtils";
 
-import { useCommonStyles } from "../styles/common";
 import { useClientPaths } from "../../context/ClientPathsContext";
 import { useThemeStyles } from "../theme/useThemeStyles";
 
@@ -24,7 +35,7 @@ const Home = ({ route, navigation }) => {
   const { t } = useTranslation();
 
   const styles = useThemeStyles().home;
-  const common = useCommonStyles();
+  const [fieldEngineerTaskCount, setFieldEngineerTaskCount] = useState(null);
 
   const logoDimension = useMemo(() => screenDimension.width / 2, []);
 
@@ -37,6 +48,10 @@ const Home = ({ route, navigation }) => {
   const { clientPaths, setClientPaths } = useClientPaths();
 
   const authenticationResult = route?.params?.authenticationResult ?? {};
+  const canAccessFieldEngineer = useMemo(
+    () => hasFieldEngineerRole(authenticationResult),
+    [authenticationResult]
+  );
 
   const userName =
     authenticationResult?.User?.[0]?.["Resource-core-name-knownAs"] ??
@@ -109,6 +124,29 @@ const Home = ({ route, navigation }) => {
   useEffect(() => {
     fetchClientDataConcurrently(authenticationResult);
   }, [authenticationResult, fetchClientDataConcurrently]);
+
+  useEffect(() => {
+    const loadFieldEngineerCount = async () => {
+      if (!canAccessFieldEngineer) {
+        setFieldEngineerTaskCount(null);
+        return;
+      }
+
+      try {
+        setFieldEngineerTaskCount(null);
+        const response = await fetchFieldEngineerTasks({
+          limit: 1000,
+          fieldSet: "dashboard",
+        });
+        setFieldEngineerTaskCount(response.data.length || 0);
+      } catch (error) {
+        console.error("Error loading field engineer task count:", error);
+        setFieldEngineerTaskCount(null);
+      }
+    };
+
+    loadFieldEngineerCount();
+  }, [canAccessFieldEngineer]);
 
   /**
    * Gets the source object for the user image.
@@ -197,9 +235,71 @@ const Home = ({ route, navigation }) => {
   const onPressExpenses = () => navigation.navigate("Expense");
   const onPressAbsences = () => navigation.navigate("Absence");
   const onPressApprovals = () => navigation.navigate("Approval");
+  const onPressFieldEngineer = () => navigation.navigate("FieldEngineer");
+
+  const renderHomeCard = ({
+    title,
+    subtitle,
+    onPress,
+    accessibilityLabel,
+    icon,
+    showNewBadge = false,
+    count,
+  }) => (
+    <Pressable
+      onPress={onPress}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      style={styles.cardTouchable}
+    >
+      {({ pressed }) => (
+        <View style={[styles.card, pressed && styles.pressedCard]}>
+          <View
+            style={[
+              styles.cardIconContainer,
+              pressed && styles.pressedCardIconContainer,
+            ]}
+          >
+            {icon(pressed)}
+          </View>
+          <View style={styles.cardContent}>
+            <Text
+              style={[styles.cardText, pressed && styles.pressedCardText]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {title}
+            </Text>
+            <Text
+              style={styles.cardDescription}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {subtitle}
+            </Text>
+          </View>
+          {showNewBadge && (
+            <View style={styles.newBadge}>
+              <Text style={styles.newBadgeText}>{t("new")}</Text>
+            </View>
+          )}
+          {count !== undefined && count !== null && (
+            <View style={styles.cardBadge}>
+              <Text style={styles.cardBadgeText}>{count}</Text>
+            </View>
+          )}
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={pressed ? "#1d5cff" : "#a8b0bd"}
+          />
+        </View>
+      )}
+    </Pressable>
+  );
 
   return (
-    <SafeAreaView style={common.container} testID="home-screen">
+    <SafeAreaView style={styles.container} testID="home-screen">
       {/**
       * Renders the client logo or a placeholder if the logo path is unavailable. 
       * `clientPaths.clientLogoPath` is fetched dynamically, while the local placeholder 
@@ -225,80 +325,79 @@ const Home = ({ route, navigation }) => {
           contentFit="contain"
         />
       </View>
-      {/* Main Menu Section */}
-      <View style={styles.main}>
-        {/* Row for Timesheet and Expense buttons */}
-        <View style={styles.row}>
-          <TouchableOpacity
-            onPress={onPressTimesheets}
-            accessibilityLabel={t("navigate_to_timesheets")}
-          >
-            <View style={styles.card}>
-              <Ionicons name="timer" size={24} color="black" />
-              <Text
-                style={styles.cardText}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {`${t("timesheet")}s`}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={onPressExpenses}
-            accessibilityLabel={t("navigate_to_expenses")}
-          >
-            <View style={styles.card}>
-              <FontAwesome name="credit-card" size={24} color="black" />
-              <Text
-                style={styles.cardText}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {`${t("expense")}s`}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Row for Absence and Approvals buttons */}
-        <View style={styles.row}>
-          <TouchableOpacity
-            onPress={onPressAbsences}
-            accessibilityLabel={t("navigate_to_absences")}
-          >
-            <View style={styles.card}>
+      <ScrollView
+        style={styles.main}
+        contentContainerStyle={styles.mainContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {renderHomeCard({
+          title: t("home_timesheets_title"),
+          subtitle: t("home_timesheets_description"),
+          onPress: onPressTimesheets,
+          accessibilityLabel: t("navigate_to_timesheets"),
+          icon: (pressed) => (
+            <Ionicons
+              name="document-text-outline"
+              size={24}
+              color={pressed ? "#1d5cff" : "#858f9f"}
+            />
+          ),
+        })}
+        {renderHomeCard({
+          title: t("home_expenses_title"),
+          subtitle: t("home_expenses_description"),
+          onPress: onPressExpenses,
+          accessibilityLabel: t("navigate_to_expenses"),
+          icon: (pressed) => (
+            <FontAwesome
+              name="dollar"
+              size={24}
+              color={pressed ? "#1d5cff" : "#858f9f"}
+            />
+          ),
+        })}
+        {renderHomeCard({
+          title: t("home_absences_title"),
+          subtitle: t("home_absences_description"),
+          onPress: onPressAbsences,
+          accessibilityLabel: t("navigate_to_absences"),
+          icon: (pressed) => (
+            <MaterialCommunityIcons
+              name="calendar-blank-outline"
+              size={24}
+              color={pressed ? "#1d5cff" : "#858f9f"}
+            />
+          ),
+        })}
+        {renderHomeCard({
+          title: t("home_approvals_title"),
+          subtitle: t("home_approvals_description"),
+          onPress: onPressApprovals,
+          accessibilityLabel: t("navigate_to_approvals"),
+          icon: (pressed) => (
+            <MaterialIcons
+              name="check-box"
+              size={24}
+              color={pressed ? "#1d5cff" : "#858f9f"}
+            />
+          ),
+        })}
+        {canAccessFieldEngineer &&
+          renderHomeCard({
+            title: t("field_engineer"),
+            subtitle: t("field_engineer_card_description"),
+            onPress: onPressFieldEngineer,
+            accessibilityLabel: t("navigate_to_field_engineer"),
+            icon: (pressed) => (
               <MaterialCommunityIcons
-                name="airplane-takeoff"
+                name="wrench-outline"
                 size={24}
-                color="black"
+                color={pressed ? "#1d5cff" : "#858f9f"}
               />
-              <Text
-                style={styles.cardText}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {`${t("absence")}s`}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={onPressApprovals}
-            accessibilityLabel={t("navigate_to_approvals")}
-          >
-            <View style={styles.card}>
-              <MaterialIcons name="approval" size={24} color="black" />
-              <Text
-                style={styles.cardText}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {t("approvals")}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
+            ),
+            count: fieldEngineerTaskCount,
+          })}
+      </ScrollView>
     </SafeAreaView>
   );
 };

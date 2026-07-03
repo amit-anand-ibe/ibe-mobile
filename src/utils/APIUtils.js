@@ -752,6 +752,10 @@ const uploadBinaryResource = async (
 
     const binaryResource = {
       attachmentId: uploadResourceResponse.id,
+      resourceId:
+        uploadResourceResponse.resourceID ||
+        uploadResourceResponse.resourceId ||
+        uploadResourceResponse.id,
       thumbId: uploadResourceResponse.thumbID,
     };
 

@@ -28,6 +28,7 @@ import CustomButton from "./CustomButton";
  * @param {string} valueItemField - The field name for the value in the search results.
  * @param {Array} additionalFields - Additional fields to extract from the search results.
  * @param {Array} searchFields - Fields to search against.
+ * @param {boolean} serverSearchEnabled - If false, only dropdown paging is used.
  * @param {boolean} multiline - If true, allows multiple lines of input.
  * @param {Function} onValueChange - Callback function when a value is selected or changed.
  * @param {boolean} disabled - If true, disables the entire component.
@@ -44,6 +45,7 @@ const CustomRemotePicker = ({
   valueItemField,
   additionalFields = [],
   searchFields = [],
+  serverSearchEnabled = true,
   multiline = false,
   onValueChange,
   disabled = false,
@@ -70,13 +72,16 @@ const CustomRemotePicker = ({
   // Effect to toggle the search button visibility based on the search query
   useEffect(() => {
     const isSearchButtonVisible =
-      searchQuery.trim().length !== 0 && selectedLabel !== searchQuery;
+      serverSearchEnabled &&
+      searchFields.length > 0 &&
+      searchQuery.trim().length !== 0 &&
+      selectedLabel !== searchQuery;
     setIsSearchButtonHidden(!isSearchButtonVisible);
 
     if (!isSearchButtonVisible) {
       setChevronToggled(false);
     }
-  }, [searchQuery, selectedLabel]);
+  }, [searchFields.length, searchQuery, selectedLabel, serverSearchEnabled]);
 
   // Effect to update state when initial props change
   useEffect(() => {
@@ -134,7 +139,7 @@ const CustomRemotePicker = ({
     const { queryFields = {}, commonQueryParams = {} } = { ...queryParams }; // Ensure to copy queryParams to avoid mutation
     const { or = [], sort = [] } = { ...queryFields };
 
-    if (!isSearchButtonHidden) {
+    if (serverSearchEnabled && !isSearchButtonHidden) {
       searchFields.forEach((field) => {
         or.push({
           fieldName: field,

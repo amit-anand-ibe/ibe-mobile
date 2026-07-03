@@ -29,6 +29,7 @@ import {
 } from "../utils/ScreenUtils";
 import { useCommonStyles } from "../styles/common";
 import { LoggedInUserInfoContext } from "../../context/LoggedInUserInfoContext";
+import ibeLogo from "../assets/images/ibe-logo.jpg";
 
 /**
  * Login component for user authentication.
@@ -226,13 +227,21 @@ const Login = ({ navigation }) => {
     APP.LOGIN_USER_CLIENT = data?.clientid || "m/d/y";
     APP.LOGIN_USER_DATE_FORMAT = user?.UserDateFormat || "m/d/y";
     APP.LOGIN_USER_EMPLOYEE_ID = user["Resource-id"] || "";
+    APP.LOGIN_USER_PERSON_ID = user["Person-id"] || "";
     APP.LOGIN_USER_ID = user["User-id"] || "";
     APP.LOGIN_USER_LANGUAGE = user?.["User-preferences"]?.language || "en";
 
     // Create a new object for user info
     const newUserInfo = {
       personId: user["Person-id"] || "",
+      knownAs: user["Resource-core-name-knownAs"] || "",
+      name:
+        user["Resource-core-name-fullName"] ||
+        user["Person-name-knownAs"] ||
+        user["Resource-core-name-knownAs"] ||
+        "",
       userType: user["User-type"] || "",
+      accessRoles: user["User-accessRoles"] || user.accessRoles || [],
       gender: user["Resource-core-gender"] || null,
       hireDate: user["Resource-core-hireDate"] || null,
       termDate: user["Resource-core-termDate"] || null,
@@ -365,7 +374,7 @@ const Login = ({ navigation }) => {
         <View style={styles.header}>
           <Image
             style={{ width: logoWidth }}
-            source={require("../assets/images/ibe-logo.jpg")}
+            source={ibeLogo}
             resizeMode="contain"
             accessibilityLabel="ibe logo"
             testID="ibe-logo"
@@ -376,19 +385,22 @@ const Login = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder={t("login_username_placeholder")}
-          placeholderTextColor="darkgrey"
+          placeholderTextColor="#6b7280"
           maxLength={LOGIN_INPUTS_MAXLENGTH.USERNAME}
           value={username}
           onChangeText={onUsernameChange}
+          autoCapitalize="none"
+          autoCorrect={false}
           accessibilityLabel={t("login_username_placeholder")}
         />
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.password}
             placeholder={t("login_password_placeholder")}
-            placeholderTextColor="darkgrey"
+            placeholderTextColor="#6b7280"
             secureTextEntry={!showPassword}
             maxLength={LOGIN_INPUTS_MAXLENGTH.PASSWORD}
+            value={password}
             autoCapitalize="none"
             autoCorrect={false}
             onChangeText={onPasswordChange}
@@ -404,14 +416,14 @@ const Login = ({ navigation }) => {
             <Ionicons
               name={showPassword ? "eye-off" : "eye"}
               size={24}
-              color="black"
+              color="#374151"
             />
           </TouchableOpacity>
         </View>
         <TextInput
           style={styles.input}
           placeholder={t("login_clientId_placeholder")}
-          placeholderTextColor="darkgrey"
+          placeholderTextColor="#6b7280"
           keyboardType="numeric"
           maxLength={LOGIN_INPUTS_MAXLENGTH.CLIENTID}
           value={clientId}
@@ -443,7 +455,7 @@ const Login = ({ navigation }) => {
       {/* Conditional Footer Rendering */}
       {!isKeyboardVisible && (
         <View style={styles.footer}>
-          <Text>
+          <Text style={styles.footerText}>
             {t("login_version_text")} {version}
           </Text>
         </View>
@@ -464,27 +476,50 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   input: {
-    borderWidth: 2,
-    borderRadius: 30,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#c5cfdd",
     paddingVertical: "4%",
     paddingHorizontal: "5%",
     marginBottom: "4%",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    backgroundColor: "#fff",
+    color: "#111827",
+    fontSize: isSmallDevice ? 13 : isMediumDevice ? 16 : 18,
+    fontWeight: "600",
   },
   passwordContainer: {
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 2,
-    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: "#c5cfdd",
+    borderRadius: 10,
     marginBottom: "4%",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    backgroundColor: "#fff",
   },
   password: {
     flex: 1,
     paddingVertical: "4%",
     paddingHorizontal: "5%",
+    color: "#111827",
+    fontSize: isSmallDevice ? 13 : isMediumDevice ? 16 : 18,
+    fontWeight: "600",
   },
   iconButton: {
-    paddingHorizontal: 10,
+    minWidth: 46,
+    minHeight: 46,
+    alignItems: "center",
+    justifyContent: "center",
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -493,17 +528,22 @@ const styles = StyleSheet.create({
     marginBottom: "4%",
   },
   checkbox: {
-    borderColor: "#000",
-    marginRight: 5,
+    width: 20,
+    height: 20,
+    borderColor: "#374151",
+    borderWidth: 1.5,
+    marginRight: 8,
   },
   checkboxText: {
-    fontSize: isSmallDevice ? 8 : isMediumDevice ? 16 : 24,
+    color: "#111827",
+    fontSize: isSmallDevice ? 13 : isMediumDevice ? 16 : 18,
+    fontWeight: "600",
   },
   loginButton: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: "5%",
-    borderRadius: 30,
+    borderRadius: 10,
     backgroundColor: "#005eb8",
     elevation: 5,
     shadowColor: "#000",
@@ -512,9 +552,9 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   loginButtonText: {
-    fontSize: isSmallDevice ? 8 : isMediumDevice ? 16 : 24,
+    fontSize: isSmallDevice ? 14 : isMediumDevice ? 17 : 20,
     fontWeight: "bold",
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     color: "white",
   },
   footer: {
@@ -522,6 +562,11 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
+  },
+  footerText: {
+    color: "#4b5563",
+    fontSize: isSmallDevice ? 12 : isMediumDevice ? 14 : 16,
+    fontWeight: "600",
   },
 });
 

@@ -22,8 +22,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 import Constants from "expo-constants";
+import * as Sharing from "expo-sharing";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { WebView } from "react-native-webview";
 
 import { screenDimension } from "../../utils/ScreenUtils";
 
@@ -63,6 +63,8 @@ const PreviewDialog = ({
 
   // State to manage loading state
   const [isLoading, setIsLoading] = useState(true);
+  const [resolvedFileUri, setResolvedFileUri] = useState(fileUri);
+  const [previewError, setPreviewError] = useState("");
   const videoPlayer = useVideoPlayer(fileUri ? { uri: fileUri } : null, (player) => {
     player.loop = true;
   });
@@ -140,16 +142,47 @@ const PreviewDialog = ({
   );
 
   useEffect(() => {
-    // If fileUri exists, set loading to false (resource is loaded)
-    if (fileUri) {
-      setIsLoading(false);
-    }
+    let isMounted = true;
+
+    const resolvePreviewUri = () => {
+      setPreviewError("");
+      setResolvedFileUri(fileUri);
+      if (isMounted) setIsLoading(false);
+    };
+
+    resolvePreviewUri();
 
     // Cleanup function
     return () => {
+      isMounted = false;
       resetSharedValues();
     };
   }, [fileUri]);
+
+  const openOrShareFile = async () => {
+    if (!resolvedFileUri) {
+      setPreviewError(t("preview_error"));
+      return;
+    }
+
+    try {
+      const isSharingAvailable = await Sharing.isAvailableAsync();
+
+      if (!isSharingAvailable) {
+        setPreviewError(t("preview_error"));
+        return;
+      }
+
+      await Sharing.shareAsync(resolvedFileUri, {
+        dialogTitle: fileTitle || t("choose_destination"),
+        mimeType: fileType === "pdf" ? "application/pdf" : undefined,
+        UTI: fileType === "pdf" ? "com.adobe.pdf" : undefined,
+      });
+    } catch (error) {
+      console.warn("Unable to open or share file:", error);
+      setPreviewError(t("sharing_failed"));
+    }
+  };
 
   // Render content based on file type
   let content;
@@ -163,7 +196,7 @@ const PreviewDialog = ({
       <View>
         <GestureDetector gesture={composed}>
           <Animated.Image
-            source={{ uri: fileUri }}
+            source={{ uri: resolvedFileUri }}
             style={[contentStyle, animatedStyles]}
             resizeMode="contain"
           />
@@ -174,7 +207,7 @@ const PreviewDialog = ({
     if (Pdf && !isRunningInExpoGo) {
       content = (
         <Pdf
-          source={{ uri: fileUri }}
+          source={{ uri: resolvedFileUri }}
           style={contentStyle}
           onLoadComplete={(numberOfPages, filePath) => {
             console.log(`Number of pages: ${numberOfPages}`);
@@ -189,20 +222,14 @@ const PreviewDialog = ({
       );
     } else {
       content = (
-        <View style={{ width: contentStyle.width, height: contentStyle.height }}>
-          <WebView
-            originWhitelist={["*"]}
-            source={{ uri: fileUri }}
-            style={{ flex: 1 }}
-            onError={(syntheticEvent) => {
-              const { nativeEvent } = syntheticEvent;
-              console.warn("WebView PDF load error", nativeEvent);
-            }}
-            startInLoadingState
-            renderLoading={() => (
-              <ActivityIndicator size="large" color="#fff" style={{ flex: 1 }} />
-            )}
-          />
+        <View style={styles.documentFallback}>
+          <Text style={styles.documentFallbackTitle}>
+            {t("pdf_preview_unavailable")}
+          </Text>
+          {!!previewError && (
+            <Text style={styles.documentFallbackError}>{previewError}</Text>
+          )}
+          <Button title={t("open_or_share_file")} onPress={openOrShareFile} />
         </View>
       );
     }
@@ -251,6 +278,24 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  documentFallback: {
+    width: screenDimension.width - 40,
+    alignItems: "center",
+    justifyContent: "center",
+    rowGap: 14,
+    padding: 18,
+  },
+  documentFallbackTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  documentFallbackError: {
+    color: "#fca5a5",
+    fontSize: 13,
+    textAlign: "center",
   },
   previewDialogContainer: {
     flex: 1,

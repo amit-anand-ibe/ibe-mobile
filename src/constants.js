@@ -4,7 +4,7 @@
  * @returns {string} - The current environment (e.g., "development", "testing", "production").
  */
 const determineEnvironment = () => {
-  return "production";
+  return "testing";
 };
 
 /**
@@ -27,7 +27,7 @@ const Environment = {
  * @type {Object.<string, string>}
  */
 const BASE_URL = {
-  [Environment.DEVELOPMENT]: "http://172.0.0.95",
+  [Environment.DEVELOPMENT]: "http://172.17.0.90",
   [Environment.TESTING]: "https://testserver.ibenv.net",
   [Environment.PRODUCTION]: "https://appnew.ibenv.net",
 };
@@ -91,6 +91,8 @@ const APP = {
   LOGIN_USER_DATE_FORMAT: "",
   /** Employee ID of the logged-in user. */
   LOGIN_USER_EMPLOYEE_ID: "",
+  /** Person ID of the logged-in user. */
+  LOGIN_USER_PERSON_ID: "",
   /** ID of the logged-in user. */
   LOGIN_USER_ID: "",
   /** Language preference of the logged-in user. Default is English. */

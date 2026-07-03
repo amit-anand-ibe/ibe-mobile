@@ -10,6 +10,16 @@ import Timesheet from "../screens/Timesheet";
 import AbsenceDetail from "../screens/AbsenceDetail";
 import TimesheetDetail from "../screens/TimesheetDetail";
 import ExpenseDetail from "../screens/ExpenseDetail";
+import FieldEngineer from "../screens/FieldEngineer";
+import FieldEngineerChecklistTemplateEdit from "../screens/FieldEngineerChecklistTemplateEdit";
+import FieldEngineerChecklistTemplateList from "../screens/FieldEngineerChecklistTemplateList";
+import FieldEngineerConfiguration from "../screens/FieldEngineerConfiguration";
+import FieldEngineerDashboard from "../screens/FieldEngineerDashboard";
+import FieldEngineerPolicyEdit from "../screens/FieldEngineerPolicyEdit";
+import FieldEngineerPolicyList from "../screens/FieldEngineerPolicyList";
+import FieldEngineerReviewTemplateEdit from "../screens/FieldEngineerReviewTemplateEdit";
+import FieldEngineerReviewTemplateList from "../screens/FieldEngineerReviewTemplateList";
+import FieldEngineerTaskDetail from "../screens/FieldEngineerTaskDetail";
 import User from "../screens/User";
 import Approval from "../screens/Approval";
 import Help from "../screens/Help";
@@ -92,6 +102,43 @@ const MainNavigator = () => {
         <Stack.Screen name="AbsenceDetail" component={AbsenceDetail} />
         <Stack.Screen name="User" component={User} />
         <Stack.Screen name="Approval" component={Approval} />
+        <Stack.Screen name="FieldEngineer" component={FieldEngineerDashboard} />
+        <Stack.Screen
+          name="FieldEngineerConfiguration"
+          component={FieldEngineerConfiguration}
+        />
+        <Stack.Screen
+          name="FieldEngineerPolicies"
+          component={FieldEngineerPolicyList}
+        />
+        <Stack.Screen
+          name="FieldEngineerPolicyEdit"
+          component={FieldEngineerPolicyEdit}
+        />
+        <Stack.Screen
+          name="FieldEngineerChecklistTemplates"
+          component={FieldEngineerChecklistTemplateList}
+        />
+        <Stack.Screen
+          name="FieldEngineerChecklistTemplateEdit"
+          component={FieldEngineerChecklistTemplateEdit}
+        />
+        <Stack.Screen
+          name="FieldEngineerReviewTemplates"
+          component={FieldEngineerReviewTemplateList}
+        />
+        <Stack.Screen
+          name="FieldEngineerReviewTemplateEdit"
+          component={FieldEngineerReviewTemplateEdit}
+        />
+        <Stack.Screen
+          name="FieldEngineerAssignments"
+          component={FieldEngineer}
+        />
+        <Stack.Screen
+          name="FieldEngineerTaskDetail"
+          component={FieldEngineerTaskDetail}
+        />
 
         {/* CustomImagePicker screen with custom header options */}
         <Stack.Screen

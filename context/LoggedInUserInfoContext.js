@@ -16,6 +16,7 @@ export const LoggedInUserInfoProvider = ({ children }) => {
   // State to hold logged-in user information
   const [loggedInUserInfo, setLoggedInUserInfo] = useState({
     userType: null,
+    accessRoles: [],
     timeConfirmationType: "",
     hireDate: null,
     gender: null,
