@@ -58,6 +58,7 @@ import { useExpenseForceRefresh } from "../../context/ForceRefreshContext";
 import { LoggedInUserInfoContext } from "../../context/LoggedInUserInfoContext";
 import { useExpenseSave } from "../../context/SaveContext";
 import { fetchCurrency, fetchEmployeeDetails } from "../utils/ExpenseUtils";
+import { ThemeContext } from "../theme/ThemeContext";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -66,6 +67,7 @@ const ExpenseDetail = ({ route, navigation }) => {
   const lang = i18n.language;
 
   const { loggedInUserInfo } = useContext(LoggedInUserInfoContext);
+  const { theme } = useContext(ThemeContext);
 
   const { updateForceRefresh } = useExpenseForceRefresh();
 
@@ -1380,6 +1382,10 @@ const ExpenseDetail = ({ route, navigation }) => {
           <Tab.Navigator
             screenOptions={{
               swipeEnabled: false,
+              tabBarActiveTintColor: theme.secondary,
+              tabBarInactiveTintColor: theme.contrastOnPrimary,
+              tabBarIndicatorStyle: { backgroundColor: theme.secondary },
+              tabBarStyle: { backgroundColor: theme.primary },
             }}
           >
             <Tab.Screen

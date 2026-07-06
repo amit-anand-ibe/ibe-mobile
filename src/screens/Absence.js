@@ -20,7 +20,7 @@ import {
   APP,
   BUSOBJCAT,
   BUSOBJCATMAP,
-  DOUBLE_CLICK_DELTA,
+  // DOUBLE_CLICK_DELTA,
   PAGE_SIZE,
 } from "../constants";
 
@@ -73,7 +73,7 @@ const Absence = ({ route, navigation }) => {
   const [sortConditions, setSortConditions] = useState([]);
   const [appliedFilters, setAppliedFilters] = useState({});
   const [appliedFiltersCount, setAppliedFiltersCount] = useState(0);
-  const [lastPress, setLastPress] = useState(0);
+  // const [lastPress, setLastPress] = useState(0);
   const [isSortModalVisible, setIsSortModalVisible] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [absenceTypeMap, setAbsenceTypeMap] = useState({});
@@ -393,7 +393,7 @@ const Absence = ({ route, navigation }) => {
   ]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       {
         // Hack/Workaround for iOS: Display the loader manually when refreshing
         // state is true because onRefresh loader doesn't trigger correctly on
@@ -460,20 +460,22 @@ const Absence = ({ route, navigation }) => {
             };
 
             const handlePress = () => {
-              const currentTime = new Date().getTime();
-              const delta = currentTime - lastPress;
+              // Previous implementation required a double tap to open the absence detail.
+              // Changed to single tap as per UX requirement.
+              // const currentTime = new Date().getTime();
+              // const delta = currentTime - lastPress;
 
-              if (delta < DOUBLE_CLICK_DELTA) {
-                // Double click threshold
-                // Double click detected, navigate to add absence screen
-                navigation.navigate("AbsenceDetail", {
-                  absenceId,
-                  statusTemplateExtId,
-                });
-              }
+              // if (delta < DOUBLE_CLICK_DELTA) {
+              //   // Double click threshold
+              //   // Double click detected, navigate to add absence screen
+              navigation.navigate("AbsenceDetail", {
+                absenceId,
+                statusTemplateExtId,
+              });
+              // }
 
               // Update last press timestamp and absence ID pressed
-              setLastPress(currentTime);
+              // setLastPress(currentTime);
             };
 
             return (
@@ -524,8 +526,8 @@ const Absence = ({ route, navigation }) => {
                             plannedDays === 0
                               ? "red"
                               : adjustAbsence
-                              ? "darkorange"
-                              : "green",
+                                ? "darkorange"
+                                : "green",
                         },
                       ]}
                     >

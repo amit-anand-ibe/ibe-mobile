@@ -17,13 +17,7 @@ import { useTranslation } from "react-i18next";
 
 import { format, isValid } from "date-fns";
 
-import {
-  APP,
-  BUSOBJCAT,
-  BUSOBJCATMAP,
-  DOUBLE_CLICK_DELTA,
-  PAGE_SIZE,
-} from "../constants";
+import { APP, BUSOBJCAT, BUSOBJCATMAP, PAGE_SIZE } from "../constants";
 
 import { fetchBusObjCatData, loadMoreData } from "../utils/APIUtils";
 import { convertToFilterScreenFormat, filtersMap } from "../utils/FilterUtils";
@@ -76,7 +70,6 @@ const Timesheet = ({ route, navigation }) => {
   const [sortConditions, setSortConditions] = useState([]);
   const [appliedFilters, setAppliedFilters] = useState({});
   const [appliedFiltersCount, setAppliedFiltersCount] = useState(0);
-  const [lastPress, setLastPress] = useState(0);
   const [isSortModalVisible, setIsSortModalVisible] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [isModalVisibleInCreate, setModalVisibleInCreate] = useState(false);
@@ -520,7 +513,7 @@ const Timesheet = ({ route, navigation }) => {
   ]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       {
         // Hack/Workaround for iOS: Display the loader manually when refreshing
         // state is true because onRefresh loader doesn't trigger correctly on
@@ -588,20 +581,10 @@ const Timesheet = ({ route, navigation }) => {
             };
 
             const handlePress = () => {
-              const currentTime = new Date().getTime();
-              const delta = currentTime - lastPress;
-
-              if (delta < DOUBLE_CLICK_DELTA) {
-                // Double click threshold
-                // Double click detected, navigate to add timesheet screen
-                navigation.navigate("TimesheetDetail", {
-                  timesheetId,
-                  statusTemplateExtId,
-                });
-              }
-
-              // Update last press timestamp and timesheet ID pressed
-              setLastPress(currentTime);
+              navigation.navigate("TimesheetDetail", {
+                timesheetId,
+                statusTemplateExtId,
+              });
             };
 
             return (
@@ -825,6 +808,7 @@ const styles = StyleSheet.create({
   },
   firstColumn: {
     flex: 2,
+    paddingRight: 4,
   },
   firstColumnText: {
     color: "#2f4F4f",
@@ -838,7 +822,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   secondColumnSecondRowText: {
-    paddingRight: 8,
+    paddingRight: 4,
   },
   thirdColumn: {
     flex: 1,

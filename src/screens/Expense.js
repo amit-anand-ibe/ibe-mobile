@@ -27,13 +27,7 @@ import {
 import { showToast } from "../utils/MessageUtils";
 import { convertToFilterScreenFormat, filtersMap } from "../utils/FilterUtils";
 
-import {
-  APP,
-  BUSOBJCAT,
-  BUSOBJCATMAP,
-  DOUBLE_CLICK_DELTA,
-  PAGE_SIZE,
-} from "../constants";
+import { APP, BUSOBJCAT, BUSOBJCATMAP, PAGE_SIZE } from "../constants";
 
 import Loader from "../components/Loader";
 import CustomBackButton from "../components/CustomBackButton";
@@ -58,7 +52,6 @@ const Expense = ({ route, navigation }) => {
   const [sortConditions, setSortConditions] = useState([]);
   const [appliedFilters, setAppliedFilters] = useState({});
   const [appliedFiltersCount, setAppliedFiltersCount] = useState(0);
-  const [lastPress, setLastPress] = useState(0);
   const [isSortModalVisible, setIsSortModalVisible] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [error, setError] = useState(null);
@@ -350,20 +343,10 @@ const Expense = ({ route, navigation }) => {
             };
 
             const handlePress = () => {
-              const currentTime = new Date().getTime();
-              const delta = currentTime - lastPress;
-
-              if (delta < DOUBLE_CLICK_DELTA) {
-                // Double click threshold
-                // Double click detected, navigate to expense detail screen
-                navigation.navigate("ExpenseDetail", {
-                  expenseId,
-                  statusTemplateExtId,
-                });
-              }
-
-              // Update last press timestamp and expense ID pressed
-              setLastPress(currentTime);
+              navigation.navigate("ExpenseDetail", {
+                expenseId,
+                statusTemplateExtId,
+              });
             };
 
             return (

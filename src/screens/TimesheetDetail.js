@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useState, useRef } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -49,6 +49,7 @@ import Loader from "../components/Loader";
 import { useTimesheetForceRefresh } from "../../context/ForceRefreshContext";
 import { useTimesheetSave } from "../../context/SaveContext";
 import useEmployeeInfo from "../hooks/useEmployeeInfo";
+import { ThemeContext } from "../theme/ThemeContext";
 
 import { format } from "date-fns";
 
@@ -57,6 +58,7 @@ const Tab = createMaterialTopTabNavigator();
 const TimesheetDetail = ({ route, navigation }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
+  const { theme } = useContext(ThemeContext);
 
   const { updateForceRefresh } = useTimesheetForceRefresh();
 
@@ -1902,7 +1904,15 @@ const TimesheetDetail = ({ route, navigation }) => {
         timesheetAbsences &&
         itemStatusIDMap && (
           <>
-            <Tab.Navigator screenOptions={{ swipeEnabled: false }}>
+            <Tab.Navigator
+              screenOptions={{
+                swipeEnabled: false,
+                tabBarActiveTintColor: theme.secondary,
+                tabBarInactiveTintColor: theme.contrastOnPrimary,
+                tabBarIndicatorStyle: { backgroundColor: theme.secondary },
+                tabBarStyle: { backgroundColor: theme.primary },
+              }}
+            >
               <Tab.Screen
                 name={t("general")}
                 options={{
