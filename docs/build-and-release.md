@@ -52,6 +52,14 @@ Profile mapping:
 
 Use `--platform ios` for iOS builds.
 
+If Git is not available in the terminal PATH, EAS can be run without VCS metadata:
+
+```powershell
+$env:EAS_NO_VCS="1"; eas build --profile preview --platform android
+```
+
+This should be treated as a local workaround. The preferred long-term setup is to have Git installed and available in PATH.
+
 ## Versioning
 
 There are two version concepts:
@@ -74,3 +82,11 @@ Android `versionCode` and iOS `buildNumber` must increase for every store upload
 ```
 
 So normally you should not manually edit `android.versionCode` or `ios.buildNumber` for every build.
+
+The project uses remote EAS app version source:
+
+```json
+"appVersionSource": "remote"
+```
+
+With remote version source, EAS stores and increments the native build numbers on EAS servers. It does not edit local `app.json` for every build.
