@@ -86,7 +86,7 @@ Branch strategy and EAS build profiles should normally align as follows:
 | Branch | Purpose | EAS profile | Backend environment |
 | --- | --- | --- | --- |
 | `develop` | Developer integration | `development` | `development` |
-| `staging` | QA/UAT testing | `preview` | `testing` |
+| `staging` | QA/UAT testing | `preview` / `testing-store` | `testing` |
 | `main` | Production release | `production` | `production` |
 
 Do not edit `src/constants.js` to switch environments. Use EAS profiles and `APP_ENV` as described in [Build and Release Notes](./build-and-release.md).

@@ -29,6 +29,15 @@
       "autoIncrement": true,
       "distribution": "internal"
     },
+    "testing-store": {
+      "env": {
+        "APP_ENV": "testing"
+      },
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      }
+    },
     "production": {
       "env": {
         "APP_ENV": "production"

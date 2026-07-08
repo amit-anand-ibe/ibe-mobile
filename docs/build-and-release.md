@@ -41,13 +41,15 @@ Build profiles are configured in `eas.json`.
 ```bash
 eas build --profile development --platform android
 eas build --profile preview --platform android
+eas build --profile testing-store --platform android
 eas build --profile production --platform android
 ```
 
 Profile mapping:
 
 - `development` uses `APP_ENV=development`
-- `preview` uses `APP_ENV=testing`
+- `preview` uses `APP_ENV=testing` and is intended for internal APK testing
+- `testing-store` uses `APP_ENV=testing` and creates an Android App Bundle for Play Console testing
 - `production` uses `APP_ENV=production`
 
 Use `--platform ios` for iOS builds.
@@ -67,7 +69,7 @@ This should be treated as a local workaround. The preferred long-term setup is t
 Create a testing build:
 
 ```bash
-eas build --profile preview --platform android
+eas build --profile testing-store --platform android
 ```
 
 Upload the generated `.aab` to Google Play Console:
