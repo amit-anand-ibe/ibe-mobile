@@ -259,9 +259,38 @@ Recommended test flow:
 13. Complete the job.
 14. Reopen the job and confirm execution state was saved to backend.
 
-## Known Technical Debt
+## Known Limitations and Technical Debt
 
-- Client-specific review item overrides live in mobile code until backend configuration supports all required source paths consistently.
-- PDF preview support depends on platform capabilities. A native PDF viewer dependency should be considered for production-grade in-app PDF viewing.
-- Notifications and offline sync behavior should be verified separately if required for production rollout.
+### Configuration
+
+- Some customer review items are still resolved through client-specific mobile overrides in `src/config/fieldServiceReviewOverrides.js`.
+- The preferred long-term design is to keep review item definitions fully backend-configurable through `FieldServiceReviewTemplate`.
+- Mobile overrides should be treated as temporary compatibility logic for customer/project data that is not yet normalized in backend configuration.
+
+### Documents and Preview
+
+- PDF and document handling depends on platform capabilities.
+- Unsupported document types are offered for download/share instead of in-app preview.
+- A native PDF viewer dependency should be considered if production requires reliable in-app PDF viewing across Android and iOS.
+
+### Notifications and Offline Use
+
+- Assignment notifications still need separate production validation if they are required for rollout.
+- Offline execution and sync conflict handling should be reviewed before supporting disconnected field work as a formal requirement.
+
+### Access and Authentication
+
 - Role values must be returned reliably in authentication data as `accessRoles` / `User-accessRoles`.
+- The app does not use `User-access` for Field Services authorization because that field is boolean.
+
+### Backend Consistency
+
+- Field Services objects must exist in backend metadata and collections before mobile execution data can be saved reliably.
+- Checklist, review template, policy, and execution objects should be included in deployment/setup scripts for each environment.
+- Existing tasks may not have matching Field Services execution records; the mobile app creates execution state as users start interacting with the assignment.
+
+### Testing Gaps
+
+- End-to-end completion should be tested on both Android and iOS real devices.
+- Store/TestFlight builds should verify camera, location, document preview/download, call, email, and map actions.
+- Large assignment lists should be tested with realistic production-like task volumes and policy cutoff dates.

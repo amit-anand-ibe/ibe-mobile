@@ -60,6 +60,49 @@ $env:EAS_NO_VCS="1"; eas build --profile preview --platform android
 
 This should be treated as a local workaround. The preferred long-term setup is to have Git installed and available in PATH.
 
+## Testing Distribution
+
+### Android
+
+Create a testing build:
+
+```bash
+eas build --profile preview --platform android
+```
+
+Upload the generated `.aab` to Google Play Console:
+
+1. Open the app in Google Play Console.
+2. Go to Testing.
+3. Choose Internal testing or Closed testing.
+4. Create a new release.
+5. Upload the `.aab`.
+6. Add release notes.
+7. Review and roll out to testers.
+
+### iOS
+
+Create a testing build:
+
+```bash
+eas build --profile preview --platform ios
+```
+
+Submit to App Store Connect:
+
+```bash
+eas submit --platform ios
+```
+
+Then in App Store Connect:
+
+1. Open the app.
+2. Go to TestFlight.
+3. Wait for Apple processing.
+4. Add the build to the tester group.
+5. Add test notes if required.
+6. Start testing.
+
 ## Versioning
 
 There are two version concepts:

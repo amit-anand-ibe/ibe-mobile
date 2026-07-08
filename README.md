@@ -117,25 +117,23 @@ Once you have the application set up and dependencies installed, you can run the
 
 ## Building the Application
 
-To build the application for release using Expo, you can use **Expo's build service**.
+Builds are created with EAS Build profiles. Do not edit `src/constants.js` to switch environments.
 
-### For iOS:
-
-To build the iOS app, run the following command:
+Testing / QA build:
 
 ```bash
-npx expo build:ios
+eas build --profile preview --platform android
+eas build --profile preview --platform ios
 ```
 
-This will guide you through the process of building the iOS app and generate a build that can be deployed to TestFlight.
-
-### For Android:
+Production build:
 
 ```bash
-npx expo build:android
+eas build --profile production --platform android
+eas build --profile production --platform ios
 ```
 
-This will generate an APK or AAB file that can be distributed to users or uploaded to the Google Play Store.
+For environment mapping, versioning, and store upload notes, see [Build and Release Notes](./docs/build-and-release.md).
 
 ## Folder Structure
 
