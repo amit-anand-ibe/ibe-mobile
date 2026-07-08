@@ -1,22 +1,40 @@
 {
   "cli": {
-    "version": ">= 7.3.0"
+    "version": ">= 7.3.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "simulator": {
+      "env": {
+        "APP_ENV": "development"
+      },
+      "autoIncrement": true,
       "ios": {
         "distribution": "internal",
         "simulator": true
       }
     },
     "development": {
+      "env": {
+        "APP_ENV": "development"
+      },
+      "autoIncrement": true,
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "env": {
+        "APP_ENV": "testing"
+      },
+      "autoIncrement": true,
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      "env": {
+        "APP_ENV": "production"
+      },
+      "autoIncrement": true
+    }
   },
   "submit": {
     "production": {}

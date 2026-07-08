@@ -252,6 +252,7 @@ const Home = ({ route, navigation }) => {
     accessibilityLabel,
     icon,
     showNewBadge = false,
+    showBetaBadge = false,
     count,
   }) => (
     <Pressable
@@ -271,13 +272,20 @@ const Home = ({ route, navigation }) => {
             {icon(pressed)}
           </View>
           <View style={styles.cardContent}>
-            <Text
-              style={[styles.cardText, pressed && styles.pressedCardText]}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {title}
-            </Text>
+            <View style={styles.cardTitleRow}>
+              <Text
+                style={[styles.cardText, pressed && styles.pressedCardText]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {title}
+              </Text>
+              {showBetaBadge && (
+                <View style={styles.betaBadge}>
+                  <Text style={styles.betaBadgeText}>Beta</Text>
+                </View>
+              )}
+            </View>
             <Text
               style={styles.cardDescription}
               numberOfLines={2}
@@ -406,6 +414,7 @@ const Home = ({ route, navigation }) => {
               />
             ),
             count: fieldEngineerTaskCount,
+            showBetaBadge: true,
           })}
       </ScrollView>
       </SafeAreaView>

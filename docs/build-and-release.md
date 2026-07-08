@@ -1,0 +1,76 @@
+# Build and Release Notes
+
+## Environments
+
+The app supports three backend environments:
+
+- `development`
+- `testing`
+- `production`
+
+Do not edit `src/constants.js` before each build. The app reads the active environment from Expo config:
+
+```js
+Constants.expoConfig.extra.appEnvironment
+```
+
+`app.config.js` sets this value from `APP_ENV`. If `APP_ENV` is not provided, the app defaults to `testing`.
+
+## Local Expo
+
+Expo Go defaults to `testing`.
+
+To run against development in PowerShell:
+
+```powershell
+$env:APP_ENV="development"
+npx expo start -c
+```
+
+To run against production locally:
+
+```powershell
+$env:APP_ENV="production"
+npx expo start -c
+```
+
+## EAS Build Profiles
+
+Build profiles are configured in `eas.json`.
+
+```bash
+eas build --profile development --platform android
+eas build --profile preview --platform android
+eas build --profile production --platform android
+```
+
+Profile mapping:
+
+- `development` uses `APP_ENV=development`
+- `preview` uses `APP_ENV=testing`
+- `production` uses `APP_ENV=production`
+
+Use `--platform ios` for iOS builds.
+
+## Versioning
+
+There are two version concepts:
+
+- `expo.version`: user-facing app version, for example `1.1.0`
+- Android `versionCode` and iOS `buildNumber`: store build numbers
+
+`expo.version` should be updated manually only when the release version changes.
+
+Examples:
+
+- bug fix: `1.1.1`
+- minor feature: `1.2.0`
+- major release: `2.0.0`
+
+Android `versionCode` and iOS `buildNumber` must increase for every store upload. EAS handles this automatically because all build profiles have:
+
+```json
+"autoIncrement": true
+```
+
+So normally you should not manually edit `android.versionCode` or `ios.buildNumber` for every build.

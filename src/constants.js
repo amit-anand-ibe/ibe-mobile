@@ -1,10 +1,16 @@
+import Constants from "expo-constants";
+
 /**
  * Function to dynamically determine the current environment.
  * This function can be based on various factors such as the domain, configuration files, etc.
  * @returns {string} - The current environment (e.g., "development", "testing", "production").
  */
 const determineEnvironment = () => {
-  return "testing";
+  const configuredEnvironment =
+    Constants?.expoConfig?.extra?.appEnvironment ||
+    Constants?.manifest?.extra?.appEnvironment;
+
+  return configuredEnvironment || Environment.TESTING;
 };
 
 /**

@@ -134,18 +134,38 @@ export const useThemeStyles = () => {
       pressedCardIconContainer: {
         backgroundColor: "#eef3ff",
       },
-      cardContent: {
-        flex: 1,
-        paddingRight: 10,
-      },
-      cardText: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "#697282",
-      },
-      pressedCardText: {
-        color: "#1d5cff",
-      },
+        cardContent: {
+          flex: 1,
+          paddingRight: 10,
+        },
+        cardTitleRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          columnGap: 8,
+        },
+        cardText: {
+          flexShrink: 1,
+          fontSize: 18,
+          fontWeight: "bold",
+          color: "#697282",
+        },
+        betaBadge: {
+          borderRadius: 6,
+          paddingHorizontal: 7,
+          paddingVertical: 3,
+          backgroundColor: "#fff7ed",
+          borderWidth: 1,
+          borderColor: "#fed7aa",
+        },
+        betaBadgeText: {
+          color: "#c2410c",
+          fontSize: 11,
+          fontWeight: "800",
+          textTransform: "uppercase",
+        },
+        pressedCardText: {
+          color: "#1d5cff",
+        },
       cardDescription: {
         color: "#9aa2af",
         fontSize: 14,
