@@ -1,13 +1,17 @@
 // React and React Native Core Imports
 import React, { useCallback, useState, useEffect, useContext } from "react";
-import { View, Text, FlatList, StyleSheet, Platform } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Third-Party Libraries
-import {
-  GestureHandlerRootView,
-  Switch,
-  TouchableOpacity,
-} from "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 
@@ -41,6 +45,7 @@ import Loader from "../components/Loader";
 import CustomBackButton from "../components/CustomBackButton";
 import EditDialog from "../components/dialogs/EditDialog";
 import CustomButton from "../components/CustomButton";
+import ScreenHeader from "../components/ScreenHeader";
 
 import { ApprovalUserInfoContext } from "../../context/ApprovalUserInfoContext";
 
@@ -448,28 +453,32 @@ const Approval = ({ route, navigation }) => {
   const headerRight = useCallback(() => {
     return (
       <View style={styles.headerRightContainer}>
-        <Text style={styles.toggleLabel}>
-          {isRead ? t("read") : t("unread")}
-        </Text>
-        <GestureHandlerRootView>
-          <Switch
-            value={isRead}
-            onValueChange={toggleReadStatus}
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={isRead ? "#f5dd4b" : "#f4f3f4"}
-            accessibilityLabel={isRead ? t("read") : t("unread")}
-            accessibilityRole="switch"
-            testID="unread-toggle-switch"
+        <TouchableOpacity
+          style={styles.readToggleButton}
+          onPress={toggleReadStatus}
+          accessibilityLabel={isRead ? t("read") : t("unread")}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: isRead }}
+          testID="unread-toggle-switch"
+        >
+          <Text style={styles.readToggleText} numberOfLines={1}>
+            {isRead ? t("read") : t("unread")}
+          </Text>
+          <View
+            style={[
+              styles.readToggleIndicator,
+              isRead && styles.readToggleIndicatorActive,
+            ]}
           />
-        </GestureHandlerRootView>
-        <>
+        </TouchableOpacity>
+        <View style={styles.headerIconsContainer}>
           <CustomButton
             onPress={navigateToFilters}
             label=""
             icon={{
               name: "filter",
               library: "FontAwesome",
-              size: 30,
+              size: 24,
               color: "white",
             }}
             disabled={loading}
@@ -482,7 +491,7 @@ const Approval = ({ route, navigation }) => {
               </Text>
             </View>
           )}
-        </>
+        </View>
       </View>
     );
   }, [isRead, t, toggleReadStatus, appliedFiltersCount, loading]);
@@ -750,7 +759,12 @@ const Approval = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.screen}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView
+        style={styles.container}
+        edges={["right", "bottom", "left"]}
+      >
       {/* Loader when data is being fetched */}
       {loading ? (
         <Loader />
@@ -823,27 +837,37 @@ const Approval = ({ route, navigation }) => {
             : []),
         ]}
       />
+      </SafeAreaView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    padding: "2%",
+    paddingHorizontal: 12,
     paddingVertical: 0,
   },
   headerLeftContainer: {
+    maxWidth: screenDimension.width * 0.62,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
+    flexShrink: 1,
   },
   headerRightContainer: {
-    maxWidth: screenDimension.width / 3,
+    maxWidth: screenDimension.width * 0.36,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    gap: 5,
+    gap: 8,
+    flexShrink: 0,
+  },
+  headerIconsContainer: {
+    position: "relative",
   },
   headerText: {
     fontSize: screenDimension.width > 400 ? 18 : 16,
@@ -851,11 +875,12 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   listContainer: {
-    paddingVertical: "2%",
+    paddingTop: 10,
+    paddingBottom: 24,
   },
   itemContainer: {
     backgroundColor: "#fff",
-    marginBottom: "2%",
+    marginBottom: 10,
     borderRadius: 8,
     borderWidth: 0.5,
   },
@@ -924,9 +949,33 @@ const styles = StyleSheet.create({
   textBold: {
     fontWeight: "bold",
   },
-  toggleLabel: {
+  readToggleButton: {
+    minHeight: 36,
+    maxWidth: 112,
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.16)",
+    paddingLeft: 10,
+    paddingRight: 6,
+  },
+  readToggleText: {
+    flexShrink: 1,
     color: "#fff",
-    fontWeight: "bold",
+    fontSize: 13,
+    fontWeight: "700",
+    marginRight: 6,
+  },
+  readToggleIndicator: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    opacity: 0.72,
+  },
+  readToggleIndicatorActive: {
+    backgroundColor: "#f5dd4b",
+    opacity: 1,
   },
   emptyMessageContainer: {
     flex: 1,

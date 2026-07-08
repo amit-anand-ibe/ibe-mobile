@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import { StyleSheet, View, ActivityIndicator } from "react-native";
+import React from "react";
+import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
 import { WebView } from "react-native-webview";
 import { useTranslation } from "react-i18next";
 
 import CustomBackButton from "../components/CustomBackButton";
+import ScreenHeader from "../components/ScreenHeader";
 
 /**
  * Help screen component that displays user documentation using a WebView.
@@ -16,15 +17,22 @@ import CustomBackButton from "../components/CustomBackButton";
 const Help = ({ navigation }) => {
   const { t } = useTranslation();
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: t("help"),
-      headerLeft: () => <CustomBackButton navigation={navigation} t={t} />,
-    });
-  }, [navigation, t]);
-
   return (
     <View style={styles.container}>
+      <ScreenHeader
+        left={
+          <View style={styles.headerLeftContainer}>
+            <CustomBackButton navigation={navigation} t={t} />
+            <Text
+              style={styles.headerTitle}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {t("help")}
+            </Text>
+          </View>
+        }
+      />
       <WebView
         style={styles.webview}
         source={{ uri: "https://www.ibe.net/docs/" }} // URL for the help documentation
@@ -50,6 +58,16 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject, // Ensures the container fills the parent View
     justifyContent: "center", // Center vertically
     alignItems: "center", // Center horizontally
+  },
+  headerLeftContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

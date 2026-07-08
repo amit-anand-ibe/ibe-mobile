@@ -43,6 +43,7 @@ const CustomButton = ({
   testID,
 }) => {
   const [pressed, setPressed] = useState(false);
+  const isIconOnly = !label;
 
   /**
    * Callback function invoked when the button is pressed, invokes the onPress callback.
@@ -96,6 +97,7 @@ const CustomButton = ({
     <Pressable
       style={[
         styles.button,
+        isIconOnly && styles.iconOnlyButton,
         backgroundColor && {
           opacity: pressed || disabled ? 0.6 : 1,
         },
@@ -125,18 +127,20 @@ const CustomButton = ({
         />
       )}
       {/* Text label */}
-      <Text
-        style={[
-          styles.buttonLabel,
-          !backgroundColor && { color: "black" },
-          labelStyle,
-          { opacity: pressed || disabled ? 0.6 : 1 },
-        ]}
-        numberOfLines={1}
-        ellipsizeMode="tail"
-      >
-        {label}
-      </Text>
+      {!isIconOnly && (
+        <Text
+          style={[
+            styles.buttonLabel,
+            !backgroundColor && { color: "black" },
+            labelStyle,
+            { opacity: pressed || disabled ? 0.6 : 1 },
+          ]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {label}
+        </Text>
+      )}
     </Pressable>
   );
 };
@@ -148,6 +152,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: "5%",
     paddingHorizontal: "2%",
+  },
+  iconOnlyButton: {
+    minWidth: 40,
+    minHeight: 40,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
   },
   buttonLabel: {
     color: "white",

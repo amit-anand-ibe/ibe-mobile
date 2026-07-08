@@ -10,7 +10,10 @@ import {
   Text,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { isEqual } from "../utils/FormatUtils";
 import CustomTextInput from "./CustomTextInput";
@@ -52,6 +55,7 @@ const CustomPicker = ({
 }) => {
   // Initialize useTranslation hook
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   if (!placeholder) {
     placeholder = `${t("select")}...`;
@@ -147,6 +151,11 @@ const CustomPicker = ({
     setModalVisible(!isModalVisible);
   };
 
+  const modalSafeAreaStyle = {
+    paddingTop: Math.max(insets.top, Platform.OS === "ios" ? 44 : 0) + 8,
+    paddingBottom: Math.max(insets.bottom, Platform.OS === "ios" ? 24 : 0) + 8,
+  };
+
   return (
     <View
       style={[styles.container, containerStyle]}
@@ -176,9 +185,13 @@ const CustomPicker = ({
             visible={isModalVisible}
             transparent={true}
             animationType="slide"
+            presentationStyle="overFullScreen"
             onRequestClose={toggleModal}
           >
-            <SafeAreaView style={styles.modalContainer}>
+            <SafeAreaView
+              style={[styles.modalContainer, modalSafeAreaStyle]}
+              edges={["top", "right", "bottom", "left"]}
+            >
               <FlatList
                 data={[{ label: placeholder, value: null }, ...filteredItems]}
                 keyExtractor={(item, index) => `${item.value}-${index}`}

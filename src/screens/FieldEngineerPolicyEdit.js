@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import CustomBackButton from "../components/CustomBackButton";
+import ScreenHeader from "../components/ScreenHeader";
 import {
   ChecklistTemplateSettingPicker,
   CustomerSettingPicker,
@@ -454,12 +455,14 @@ const FieldEngineerPolicyEdit = ({ navigation, route }) => {
   }, [hasUnsavedChanges, navigation, t]);
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-      >
+    <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        >
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -667,8 +670,9 @@ const FieldEngineerPolicyEdit = ({ navigation, route }) => {
         </View>
 
       </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 };
 

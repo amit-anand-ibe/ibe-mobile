@@ -1,4 +1,5 @@
 import Toast from "react-native-root-toast";
+import { Platform } from "react-native";
 
 // Internal queue to manage toast messages
 let toastQueue = [];
@@ -66,6 +67,7 @@ const displayNextToast = () => {
       backgroundColor,
       textColor,
       duration,
+      position: Platform.OS === "ios" ? -68 : -64,
       ...props,
       onHidden: () => {
         // Remove the displayed message from the queue

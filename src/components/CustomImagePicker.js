@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+/* global require */
+
+import React, { useCallback, useMemo, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -28,6 +30,7 @@ import updateFields, { handleBackNavigation } from "../utils/UpdateUtils";
 import Loader from "./Loader";
 import CustomButton from "./CustomButton";
 import CustomBackButton from "./CustomBackButton";
+import ScreenHeader from "./ScreenHeader";
 import { useClientPaths } from "../../context/ClientPathsContext";
 
 /**
@@ -112,58 +115,59 @@ const CustomImagePicker = ({ route, navigation }) => {
     setHasChanged(false);
   }, []);
 
-  useEffect(() => {
-    // Set navigation options for the header buttons
-    navigation.setOptions({
-      headerTitle: "",
-      headerLeft: () => (
-        <CustomBackButton
-          navigation={navigation}
-          hasUnsavedChanges={hasChanged}
-          discardChanges={handleDiscardChanges}
-          t={t}
+  const headerLeft = useCallback(
+    () => (
+      <CustomBackButton
+        navigation={navigation}
+        hasUnsavedChanges={hasChanged}
+        discardChanges={handleDiscardChanges}
+        t={t}
+      />
+    ),
+    [handleDiscardChanges, hasChanged, navigation, t]
+  );
+
+  const headerRight = useCallback(
+    () => (
+      <View style={styles.headerRightContainer}>
+        <CustomButton
+          onPress={onSave}
+          label={t("save")}
+          icon={{
+            name: "content-save",
+            library: "MaterialCommunityIcons",
+            size: 24,
+            color: "white",
+          }}
+          disabled={!hasChanged || isLoading}
+          backgroundColor={false}
+          style={{ icon: { marginRight: 0 } }}
+          labelStyle={styles.buttonLabelWhite}
+          accessibilityLabel={t("save_user_photo")}
+          accessibilityRole="button"
+          testID="save-user-photo-button"
         />
-      ),
-      headerRight: () => (
-        <View style={styles.headerRightContainer}>
-          <CustomButton
-            onPress={onSave}
-            label={t("save")}
-            icon={{
-              name: "content-save",
-              library: "MaterialCommunityIcons",
-              size: 24,
-              color: "white",
-            }}
-            disabled={!hasChanged || isLoading}
-            backgroundColor={false}
-            style={{ icon: { marginRight: 0 } }}
-            labelStyle={styles.buttonLabelWhite}
-            accessibilityLabel={t("save_user_photo")}
-            accessibilityRole="button"
-            testID="save-user-photo-button"
-          />
-          <CustomButton
-            onPress={onDelete}
-            label={t("delete")}
-            icon={{
-              name: "image-remove",
-              library: "MaterialCommunityIcons",
-              size: 24,
-              color: "white",
-            }}
-            disabled={!existingUserPhoto || hasChanged || isLoading}
-            backgroundColor={false}
-            style={{ icon: { marginRight: 0 } }}
-            labelStyle={styles.buttonLabelWhite}
-            accessibilityLabel={t("delete_user_photo")}
-            accessibilityRole="button"
-            testID="delete-user-photo-button"
-          />
-        </View>
-      ),
-    });
-  }, [hasChanged, isLoading]);
+        <CustomButton
+          onPress={onDelete}
+          label={t("delete")}
+          icon={{
+            name: "image-remove",
+            library: "MaterialCommunityIcons",
+            size: 24,
+            color: "white",
+          }}
+          disabled={!existingUserPhoto || hasChanged || isLoading}
+          backgroundColor={false}
+          style={{ icon: { marginRight: 0 } }}
+          labelStyle={styles.buttonLabelWhite}
+          accessibilityLabel={t("delete_user_photo")}
+          accessibilityRole="button"
+          testID="delete-user-photo-button"
+        />
+      </View>
+    ),
+    [existingUserPhoto, hasChanged, isLoading, onDelete, onSave, t]
+  );
 
   /**
    * Compresses the selected image to reduce its file size.
@@ -533,8 +537,10 @@ const CustomImagePicker = ({ route, navigation }) => {
 
   // Render JSX
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.imageContainer}>
+    <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView style={styles.container} edges={["right", "bottom", "left"]}>
+        <View style={styles.imageContainer}>
         <Image source={imageSource} style={styles.image} contentFit="contain" />
         {hasChanged && (
           <CustomButton
@@ -553,8 +559,8 @@ const CustomImagePicker = ({ route, navigation }) => {
             testID="delete-user-photo-button"
           />
         )}
-      </View>
-      <View style={styles.buttonContainer}>
+        </View>
+        <View style={styles.buttonContainer}>
         <Button
           label={t("pick_image")}
           icon="picture-o"
@@ -567,9 +573,10 @@ const CustomImagePicker = ({ route, navigation }) => {
           accessibilityLabel={t("open_camera_photo")}
           onPress={openCameraAsync}
         />
-      </View>
-      {isLoading && <Loader />}
-    </SafeAreaView>
+        </View>
+        {isLoading && <Loader />}
+      </SafeAreaView>
+    </View>
   );
 };
 

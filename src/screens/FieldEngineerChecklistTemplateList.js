@@ -14,6 +14,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import CustomBackButton from "../components/CustomBackButton";
+import ScreenHeader from "../components/ScreenHeader";
 import { fetchFieldServiceChecklistTemplates } from "../utils/FieldEngineerUtils";
 
 const FieldEngineerChecklistTemplateList = ({ navigation }) => {
@@ -147,32 +148,35 @@ const FieldEngineerChecklistTemplateList = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color="#005eb8" />
-        </View>
-      ) : (
-        <FlatList
-          data={templates}
-          keyExtractor={(item, index) =>
-            `checklist-template-${item.id || item.extID || index}`
-          }
-          renderItem={renderTemplate}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={
-            <View style={styles.emptyCard}>
-              <Text style={styles.emptyText}>
-                {t("field_engineer_no_checklist_templates")}
-              </Text>
-            </View>
-          }
-        />
-      )}
-    </SafeAreaView>
+    <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#005eb8" />
+          </View>
+        ) : (
+          <FlatList
+            data={templates}
+            keyExtractor={(item, index) =>
+              `checklist-template-${item.id || item.extID || index}`
+            }
+            renderItem={renderTemplate}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            contentContainerStyle={styles.listContent}
+            ListEmptyComponent={
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyText}>
+                  {t("field_engineer_no_checklist_templates")}
+                </Text>
+              </View>
+            }
+          />
+        )}
+      </SafeAreaView>
+    </View>
   );
 };
 

@@ -33,6 +33,7 @@ import { screenDimension } from "../../utils/ScreenUtils";
 
 import CustomBackButton from "../CustomBackButton";
 import CustomButton from "../CustomButton";
+import ScreenHeader from "../ScreenHeader";
 
 const Filters = ({ route, navigation }) => {
   const {
@@ -221,7 +222,7 @@ const Filters = ({ route, navigation }) => {
             busObjCat={BUSOBJCATMAP[busObjCat]}
           />
         );
-      case "picker":
+      case "picker": {
         // Get the corresponding picker options based on the filter's option field
         const optionsForPicker = pickerOptions[filter.option] || [];
 
@@ -244,6 +245,7 @@ const Filters = ({ route, navigation }) => {
             pickerOptions={optionsForPicker}
           />
         );
+      }
       default:
         return null;
     }
@@ -386,23 +388,29 @@ const Filters = ({ route, navigation }) => {
   }, [clearFilterValue]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={20}
-      >
-        <ScrollView>
-          <View style={styles.filterContainer}>
-            {busObjCatFilters.map((filter) => renderFilter(filter))}
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    <View style={styles.screen}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView style={styles.container} edges={["right", "bottom", "left"]}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={20}
+        >
+          <ScrollView>
+            <View style={styles.filterContainer}>
+              {busObjCatFilters.map((filter) => renderFilter(filter))}
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },

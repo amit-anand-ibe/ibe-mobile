@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -45,11 +45,12 @@ import { documentStatusCheck } from "../utils/WorkflowUtils";
 
 import CustomBackButton from "../components/CustomBackButton";
 import Loader from "../components/Loader";
+import ScreenHeader from "../components/ScreenHeader";
+import ThemedTopTabBar from "../components/ThemedTopTabBar";
 
 import { useTimesheetForceRefresh } from "../../context/ForceRefreshContext";
 import { useTimesheetSave } from "../../context/SaveContext";
 import useEmployeeInfo from "../hooks/useEmployeeInfo";
-import { ThemeContext } from "../theme/ThemeContext";
 
 import { format } from "date-fns";
 
@@ -58,7 +59,6 @@ const Tab = createMaterialTopTabNavigator();
 const TimesheetDetail = ({ route, navigation }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
-  const { theme } = useContext(ThemeContext);
 
   const { updateForceRefresh } = useTimesheetForceRefresh();
 
@@ -1885,6 +1885,7 @@ const TimesheetDetail = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
       {loading ? (
         <Loader />
       ) : (
@@ -1905,18 +1906,15 @@ const TimesheetDetail = ({ route, navigation }) => {
         itemStatusIDMap && (
           <>
             <Tab.Navigator
+              tabBar={(props) => <ThemedTopTabBar {...props} />}
               screenOptions={{
                 swipeEnabled: false,
-                tabBarActiveTintColor: theme.secondary,
-                tabBarInactiveTintColor: theme.contrastOnPrimary,
-                tabBarIndicatorStyle: { backgroundColor: theme.secondary },
-                tabBarStyle: { backgroundColor: theme.primary },
               }}
             >
               <Tab.Screen
                 name={t("general")}
                 options={{
-                  tabBarLabel: ({ focused, color }) => (
+                  tabBarLabel: ({ color }) => (
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
@@ -1969,7 +1967,7 @@ const TimesheetDetail = ({ route, navigation }) => {
               <Tab.Screen
                 name={t("files")}
                 options={{
-                  tabBarLabel: ({ focused, color }) => (
+                  tabBarLabel: ({ color }) => (
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
@@ -1996,7 +1994,7 @@ const TimesheetDetail = ({ route, navigation }) => {
               <Tab.Screen
                 name={t("comments")}
                 options={{
-                  tabBarLabel: ({ focused, color }) => (
+                  tabBarLabel: ({ color }) => (
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
@@ -2023,7 +2021,7 @@ const TimesheetDetail = ({ route, navigation }) => {
               <Tab.Screen
                 name={t("history")}
                 options={{
-                  tabBarLabel: ({ focused, color }) => (
+                  tabBarLabel: ({ color }) => (
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
@@ -2062,6 +2060,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
+    flexShrink: 1,
   },
   headerLeftText: {
     fontSize: screenDimension.width > 400 ? 18 : 16,
@@ -2073,7 +2072,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    columnGap: 8,
+    columnGap: 2,
+    flexShrink: 0,
   },
 });
 

@@ -13,6 +13,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import CustomBackButton from "../components/CustomBackButton";
+import ScreenHeader from "../components/ScreenHeader";
 import {
   fetchFieldServiceChecklistTemplates,
   fetchFieldServicePolicies,
@@ -135,34 +136,37 @@ const FieldEngineerConfiguration = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#005eb8" />
-          </View>
-        ) : (
-          cards.map((card) => (
-            <ConfigurationCard
-              key={card.key}
-              iconName={card.iconName}
-              title={card.title}
-              count={card.count}
-              onPress={() => {
-                if (card.routeName) {
-                  navigation.navigate(card.routeName);
-                }
-              }}
-            />
-          ))
-        )}
-      </ScrollView>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} />
+      <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#005eb8" />
+            </View>
+          ) : (
+            cards.map((card) => (
+              <ConfigurationCard
+                key={card.key}
+                iconName={card.iconName}
+                title={card.title}
+                count={card.count}
+                onPress={() => {
+                  if (card.routeName) {
+                    navigation.navigate(card.routeName);
+                  }
+                }}
+              />
+            ))
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
 

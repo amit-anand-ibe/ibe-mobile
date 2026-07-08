@@ -1,9 +1,13 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RootSiblingParent } from "react-native-root-siblings";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+} from "react-native-safe-area-context";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Localization from "expo-localization";
+import * as SplashScreen from "expo-splash-screen";
 
 import i18n from "./src/i18n";
 import MainNavigator from "./src/navigation/MainNavigator";
@@ -25,7 +29,10 @@ import {
 } from "./context/SaveContext";
 import { ThemeProvider } from "./src/theme/ThemeContext";
 
+import AppSplashScreen from "./src/components/AppSplashScreen";
 import OfflineView from "./src/components/offline/OfflineView";
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 /**
  * Function to get the initial language of the device/platform.
@@ -65,6 +72,9 @@ const getInitialLanguage = async () => {
  * This component initializes the app, sets up localization, and renders the main navigation component.
  */
 const App = () => {
+  const [appReady, setAppReady] = useState(false);
+  const [splashVisible, setSplashVisible] = useState(true);
+
   useEffect(() => {
     /**
      * Function to initialize the app by setting up the initial language.
@@ -79,6 +89,9 @@ const App = () => {
         await i18n.changeLanguage(initialLanguage);
       } catch (error) {
         console.error("Error initializing app:", error.message);
+      } finally {
+        setAppReady(true);
+        await SplashScreen.hideAsync().catch(() => {});
       }
     };
 
@@ -86,18 +99,27 @@ const App = () => {
     initializeApp();
   }, []);
 
+  const handleSplashFinish = useCallback(() => {
+    setSplashVisible(false);
+  }, []);
+
   return (
     <RootSiblingParent>
       {/* RootSiblingParent is used for displaying modals and other components outside of the regular component hierarchy */}
-      <SafeAreaProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         {/* SafeAreaProvider ensures that content doesn't overlap system insets (e.g., status bar, notch) */}
         <Providers>
           {/* Providers component wraps the app with various context providers */}
-          <MainNavigator />
+          {appReady && <MainNavigator />}
           {/* MainNavigator is the main navigation component */}
-          <OfflineView />
+          {appReady && <OfflineView />}
           {/* OfflineView is a component to handle offline state */}
         </Providers>
+        <AppSplashScreen
+          visible={splashVisible}
+          ready={appReady}
+          onFinish={handleSplashFinish}
+        />
       </SafeAreaProvider>
     </RootSiblingParent>
   );

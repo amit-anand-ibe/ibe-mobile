@@ -322,7 +322,10 @@ const ExpenseDetailItemEditor = ({
       animationType="slide"
       onRequestClose={onCancel}
     >
-      <SafeAreaView style={styles.modalContainer}>
+      <SafeAreaView
+        style={styles.modalContainer}
+        edges={["top", "right", "bottom", "left"]}
+      >
         <Text style={styles.modalTitle} numberOfLines={1} ellipsizeMode="tail">
           {isItemEditMode
             ? isParentLocked

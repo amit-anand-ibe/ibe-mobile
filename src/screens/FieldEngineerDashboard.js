@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import { APP } from "../constants";
 import CustomBackButton from "../components/CustomBackButton";
 import Loader from "../components/Loader";
+import ScreenHeader from "../components/ScreenHeader";
 import { convertToDateFNSFormat } from "../utils/FormatUtils";
 import { screenDimension } from "../utils/ScreenUtils";
 import { showToast } from "../utils/MessageUtils";
@@ -453,24 +454,28 @@ const FieldEngineerDashboard = ({ navigation }) => {
     [navigation, t]
   );
 
+  const headerRight = useCallback(
+    () =>
+      canAccessJobSettings ? (
+        <TouchableOpacity
+          style={styles.headerMenuButton}
+          onPress={() => setConfigurationMenuVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t("field_engineer_configuration")}
+        >
+          <Ionicons name="ellipsis-vertical" size={22} color="#fff" />
+        </TouchableOpacity>
+      ) : null,
+    [canAccessJobSettings, t]
+  );
+
   useEffect(() => {
     navigation.setOptions({
       headerTitle: "",
       headerLeft,
-      headerRight: canAccessJobSettings
-        ? () => (
-            <TouchableOpacity
-              style={styles.headerMenuButton}
-              onPress={() => setConfigurationMenuVisible(true)}
-              accessibilityRole="button"
-              accessibilityLabel={t("field_engineer_configuration")}
-            >
-              <Ionicons name="ellipsis-vertical" size={22} color="#fff" />
-            </TouchableOpacity>
-          )
-        : undefined,
+      headerRight,
     });
-  }, [canAccessJobSettings, headerLeft, navigation, t]);
+  }, [headerLeft, headerRight, navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -487,7 +492,9 @@ const FieldEngineerDashboard = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+    <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
       <View style={styles.content}>
         {(refreshing || !!lastUpdatedLabel) && (
           <View style={styles.refreshStatusRow}>
@@ -714,7 +721,8 @@ const FieldEngineerDashboard = ({ navigation }) => {
           </View>
         </TouchableOpacity>
       </Modal>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 

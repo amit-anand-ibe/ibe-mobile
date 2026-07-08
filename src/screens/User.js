@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Alert, ScrollView, Switch, Text, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import CustomButton from "../components/CustomButton";
 import CustomBackButton from "../components/CustomBackButton";
 import CustomPicker from "../components/CustomPicker";
+import ScreenHeader from "../components/ScreenHeader";
 
 import { fetchData } from "../utils/APIUtils";
 import { convertToDateFNSFormat } from "../utils/FormatUtils";
@@ -393,45 +394,53 @@ const User = ({ route, navigation }) => {
    * - `t`: The translation function for localizing strings.
    * - `navigation`: The navigation object used to set options.
    */
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: t("user_preference"),
-      headerLeft: () => (
+  const headerLeft = useCallback(
+    () => (
+      <View style={styles.headerLeftContainer}>
         <CustomBackButton
           navigation={navigation}
           hasUnsavedChanges={hasUnsavedChanges}
           discardChanges={handleDiscardChanges}
           t={t}
         />
-      ),
-      headerRight: () => (
-        <View style={styles.headerRightContainer}>
-          <View style={styles.saveButtonContainer}>
-            <CustomButton
-              onPress={onSave}
-              label={t("save")}
-              icon={{
-                name: "content-save",
-                library: "MaterialCommunityIcons",
-                size: 24,
-                color: "white",
-              }}
-              disabled={saveDisabled}
-              backgroundColor={false}
-              style={{ icon: { marginRight: 0 } }}
-              labelStyle={styles.buttonLabelWhite}
-              accessibilityLabel={t("save_user_info")}
-              accessibilityRole="button"
-              testID="save-user-info-button"
-            />
-          </View>
+        <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">
+          {t("user_preference")}
+        </Text>
+      </View>
+    ),
+    [handleDiscardChanges, hasUnsavedChanges, navigation, t]
+  );
+
+  const headerRight = useCallback(
+    () => (
+      <View style={styles.headerRightContainer}>
+        <View style={styles.saveButtonContainer}>
+          <CustomButton
+            onPress={onSave}
+            label={t("save")}
+            icon={{
+              name: "content-save",
+              library: "MaterialCommunityIcons",
+              size: 24,
+              color: "white",
+            }}
+            disabled={saveDisabled}
+            backgroundColor={false}
+            style={{ icon: { marginRight: 0 } }}
+            labelStyle={styles.buttonLabelWhite}
+            accessibilityLabel={t("save_user_info")}
+            accessibilityRole="button"
+            testID="save-user-info-button"
+          />
         </View>
-      ),
-    });
-  }, [saveDisabled, onSave, t, navigation]);
+      </View>
+    ),
+    [onSave, saveDisabled, t]
+  );
 
   return (
     <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
       <ScrollView style={styles.preferenceContainer}>
         {/* Container for content before the toggle switch */}
         <View style={styles.sectionContainer}>
@@ -532,16 +541,24 @@ const User = ({ route, navigation }) => {
             >
               {t("enable_request_queue")}
             </Text>
-            <Switch
-              trackColor={{ false: "#767577", true: "#005eb8" }}
-              thumbColor={isRequestQueueEnabled ? "#f5dd4b" : "#f4f3f4"}
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={handleToggleChange}
-              value={isRequestQueueEnabled}
+            <TouchableOpacity
+              style={styles.preferenceToggleButton}
+              onPress={() => handleToggleChange(!isRequestQueueEnabled)}
               accessibilityLabel="Enable request queue toggle"
               accessibilityRole="switch"
               accessibilityState={{ checked: isRequestQueueEnabled }}
-            />
+            >
+              <Text style={styles.preferenceToggleText}>
+                {isRequestQueueEnabled ? "On" : "Off"}
+              </Text>
+              <View
+                style={[
+                  styles.preferenceToggleIndicator,
+                  isRequestQueueEnabled &&
+                    styles.preferenceToggleIndicatorActive,
+                ]}
+              />
+            </TouchableOpacity>
           </View>
           <Text
             style={styles.pickerLabel}
@@ -554,7 +571,6 @@ const User = ({ route, navigation }) => {
             items={themes}
             initialValue={selectedTheme}
             onFilter={handleThemeChange}
-            useModalInIOS={false}
             hideSearchInput={true}
             accessibilityLabel="Theme picker"
             accessibilityRole="dropdownlist"
@@ -571,7 +587,6 @@ const User = ({ route, navigation }) => {
             items={languages}
             initialValue={selectedLanguage}
             onFilter={handleLanguageChange}
-            useModalInIOS={false}
             hideSearchInput={true}
             accessibilityLabel="Language picker"
             accessibilityRole="dropdownlist"

@@ -97,6 +97,12 @@ export const useThemeStyles = () => {
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.08,
         shadowRadius: 8,
+        ...Platform.select({
+          ios: {
+            shadowOpacity: 0,
+            shadowRadius: 0,
+          },
+        }),
       },
       pressedCard: {
         borderColor: "#1d5cff",
@@ -104,7 +110,17 @@ export const useThemeStyles = () => {
       },
       cardTouchable: {
         width: "100%",
-        marginBottom: 10,
+        marginBottom: 12,
+        ...Platform.select({
+          ios: {
+            backgroundColor: theme.card.backgroundColor,
+            borderRadius: 12,
+            shadowColor: "#0f172a",
+            shadowOffset: { width: 0, height: 7 },
+            shadowOpacity: 0.16,
+            shadowRadius: 14,
+          },
+        }),
       },
       cardIconContainer: {
         width: 48,
@@ -181,6 +197,17 @@ export const useThemeStyles = () => {
         alignItems: "center",
         justifyContent: "flex-end",
       },
+      headerLeftContainer: {
+        maxWidth: screenDimension.width / 2,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+      },
+      headerTitle: {
+        color: theme.contrastOnSecondary,
+        fontSize: screenDimension.width > 400 ? 18 : 16,
+        fontWeight: "bold",
+      },
       preferenceContainer: {
         padding: "2%",
       },
@@ -214,6 +241,34 @@ export const useThemeStyles = () => {
       },
       toggleLabel: {
         fontSize: 16,
+        flex: 1,
+        paddingRight: 12,
+      },
+      preferenceToggleButton: {
+        minHeight: 36,
+        flexDirection: "row",
+        alignItems: "center",
+        borderRadius: 18,
+        backgroundColor: "#eef2f7",
+        borderWidth: 1,
+        borderColor: "#d8e0ea",
+        paddingLeft: 12,
+        paddingRight: 7,
+      },
+      preferenceToggleText: {
+        color: "#111827",
+        fontSize: 13,
+        fontWeight: "700",
+        marginRight: 8,
+      },
+      preferenceToggleIndicator: {
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+        backgroundColor: "#9aa2af",
+      },
+      preferenceToggleIndicatorActive: {
+        backgroundColor: theme.secondary,
       },
       userInfoContainer: {
         flexDirection: "row",

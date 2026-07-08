@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { APP } from "../constants";
 import CustomBackButton from "../components/CustomBackButton";
 import Loader from "../components/Loader";
+import ScreenHeader from "../components/ScreenHeader";
 import { convertToDateFNSFormat } from "../utils/FormatUtils";
 import { screenDimension } from "../utils/ScreenUtils";
 import {
@@ -558,7 +559,10 @@ const FieldEngineer = ({ navigation, route }) => {
       animationType="slide"
       onRequestClose={() => setFiltersVisible(false)}
     >
-      <View style={styles.modalBackdrop}>
+      <SafeAreaView
+        style={styles.modalBackdrop}
+        edges={["top", "right", "bottom", "left"]}
+      >
         <View style={styles.filterSheet}>
           <View style={styles.filterSheetHeader}>
             <Text style={styles.filterSheetTitle}>
@@ -691,7 +695,7 @@ const FieldEngineer = ({ navigation, route }) => {
             </View>
           )}
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
   const renderTask = ({ item }) => {
@@ -779,49 +783,58 @@ const FieldEngineer = ({ navigation, route }) => {
     );
   };
 
-  if (loading && !refreshing) {
-    return <Loader />;
-  }
-
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
-      {Platform.OS === "ios" && refreshing && <Loader />}
-      {renderFilterControls()}
-      {renderAdvancedFilters()}
-      <FlatList
-        style={styles.taskList}
-        data={displayedTasks}
-        keyExtractor={(item) => item.id || item.extId}
-        renderItem={renderTask}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            tintColor="#005eb8"
-            title={t("pull_to_refresh")}
-            titleColor="#005eb8"
-            colors={["#005eb8"]}
-            onRefresh={() => loadTasks({ isRefresh: true })}
+    <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} />
+      <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+      {loading && !refreshing ? (
+        <View style={styles.initialLoaderContainer}>
+          <Loader />
+        </View>
+      ) : (
+        <>
+          {Platform.OS === "ios" && refreshing && <Loader />}
+          {renderFilterControls()}
+          {renderAdvancedFilters()}
+          <FlatList
+            style={styles.taskList}
+            data={displayedTasks}
+            keyExtractor={(item) => item.id || item.extId}
+            renderItem={renderTask}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                tintColor="#005eb8"
+                title={t("pull_to_refresh")}
+                titleColor="#005eb8"
+                colors={["#005eb8"]}
+                onRefresh={() => loadTasks({ isRefresh: true })}
+              />
+            }
+            ListEmptyComponent={
+              !error && (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="clipboard-outline" size={36} color="#6b7280" />
+                  <Text style={styles.emptyTitle}>
+                    {t("field_engineer_no_tasks")}
+                  </Text>
+                  <Text style={styles.emptyText}>
+                    {t("field_engineer_no_tasks_description")}
+                  </Text>
+                </View>
+              )
+            }
+            ListFooterComponent={
+              refreshing ? (
+                <ActivityIndicator size="small" color="#005eb8" />
+              ) : null
+            }
+            contentContainerStyle={styles.listContent}
           />
-        }
-        ListEmptyComponent={
-          !error && (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="clipboard-outline" size={36} color="#6b7280" />
-              <Text style={styles.emptyTitle}>
-                {t("field_engineer_no_tasks")}
-              </Text>
-              <Text style={styles.emptyText}>
-                {t("field_engineer_no_tasks_description")}
-              </Text>
-            </View>
-          )
-        }
-        ListFooterComponent={
-          refreshing ? <ActivityIndicator size="small" color="#005eb8" /> : null
-        }
-        contentContainerStyle={styles.listContent}
-      />
-    </SafeAreaView>
+        </>
+      )}
+      </SafeAreaView>
+    </View>
   );
 };
 
@@ -834,6 +847,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 4,
     paddingBottom: 32,
+  },
+  initialLoaderContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   filterPanel: {
     paddingHorizontal: 14,

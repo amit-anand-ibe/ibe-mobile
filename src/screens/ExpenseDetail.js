@@ -53,12 +53,13 @@ import History from "./History";
 
 import CustomBackButton from "../components/CustomBackButton";
 import Loader from "../components/Loader";
+import ScreenHeader from "../components/ScreenHeader";
+import ThemedTopTabBar from "../components/ThemedTopTabBar";
 
 import { useExpenseForceRefresh } from "../../context/ForceRefreshContext";
 import { LoggedInUserInfoContext } from "../../context/LoggedInUserInfoContext";
 import { useExpenseSave } from "../../context/SaveContext";
 import { fetchCurrency, fetchEmployeeDetails } from "../utils/ExpenseUtils";
-import { ThemeContext } from "../theme/ThemeContext";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -67,7 +68,6 @@ const ExpenseDetail = ({ route, navigation }) => {
   const lang = i18n.language;
 
   const { loggedInUserInfo } = useContext(LoggedInUserInfoContext);
-  const { theme } = useContext(ThemeContext);
 
   const { updateForceRefresh } = useExpenseForceRefresh();
 
@@ -1375,23 +1375,21 @@ const ExpenseDetail = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
       {loading ? (
         <Loader />
       ) : (
         <>
           <Tab.Navigator
+            tabBar={(props) => <ThemedTopTabBar {...props} />}
             screenOptions={{
               swipeEnabled: false,
-              tabBarActiveTintColor: theme.secondary,
-              tabBarInactiveTintColor: theme.contrastOnPrimary,
-              tabBarIndicatorStyle: { backgroundColor: theme.secondary },
-              tabBarStyle: { backgroundColor: theme.primary },
             }}
           >
             <Tab.Screen
               name={t("key_info")}
               options={{
-                tabBarLabel: ({ focused, color }) => (
+                tabBarLabel: ({ color }) => (
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
@@ -1439,7 +1437,7 @@ const ExpenseDetail = ({ route, navigation }) => {
             <Tab.Screen
               name={t("items")}
               options={{
-                tabBarLabel: ({ focused, color }) => (
+                tabBarLabel: ({ color }) => (
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
@@ -1492,7 +1490,7 @@ const ExpenseDetail = ({ route, navigation }) => {
             <Tab.Screen
               name={t("files")}
               options={{
-                tabBarLabel: ({ focused, color }) => (
+                tabBarLabel: ({ color }) => (
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
@@ -1519,7 +1517,7 @@ const ExpenseDetail = ({ route, navigation }) => {
             <Tab.Screen
               name={t("comments")}
               options={{
-                tabBarLabel: ({ focused, color }) => (
+                tabBarLabel: ({ color }) => (
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
@@ -1546,7 +1544,7 @@ const ExpenseDetail = ({ route, navigation }) => {
             <Tab.Screen
               name={t("history")}
               options={{
-                tabBarLabel: ({ focused, color }) => (
+                tabBarLabel: ({ color }) => (
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
@@ -1581,6 +1579,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
+    flexShrink: 1,
   },
   headerLeftText: {
     fontSize: screenDimension.width > 400 ? 18 : 16,
@@ -1592,7 +1591,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    columnGap: 8,
+    columnGap: 2,
+    flexShrink: 0,
   },
 });
 

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
-  Button,
   Modal,
+  Pressable,
   Text,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -145,11 +145,14 @@ const Sort = ({
       visible={isModalVisible}
       onRequestClose={handleCancel}
     >
-      <SafeAreaView style={styles.modalContainer}>
+      <SafeAreaView
+        style={styles.modalContainer}
+        edges={["top", "right", "bottom", "left"]}
+      >
         <Text style={styles.modalTitle} numberOfLines={1} ellipsizeMode="tail">
           {t("select_sort_options")}
         </Text>
-        <GestureHandlerRootView>
+        <GestureHandlerRootView style={styles.gestureRoot}>
           <ScrollView contentContainerStyle={styles.modalContent}>
             {sortRows.map((row, index) => (
               <View key={index} style={styles.rowContainer}>
@@ -208,8 +211,22 @@ const Sort = ({
             )}
           </ScrollView>
           <View style={styles.modalButtonsContainer}>
-            <Button title={t("apply")} onPress={handleConfirm} />
-            <Button title={t("close")} onPress={handleCancel} />
+            <Pressable
+              onPress={handleCancel}
+              style={[styles.actionButton, styles.secondaryButton]}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>
+                {t("close")}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleConfirm}
+              style={[styles.actionButton, styles.primaryButton]}
+              accessibilityRole="button"
+            >
+              <Text style={styles.actionButtonText}>{t("apply")}</Text>
+            </Pressable>
           </View>
         </GestureHandlerRootView>
       </SafeAreaView>
@@ -220,20 +237,25 @@ const Sort = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    padding: "4%",
-    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
     backgroundColor: "rgba(0, 0, 0, 0.85)",
+  },
+  gestureRoot: {
+    flex: 1,
   },
   modalContent: {
     backgroundColor: "#fff",
-    padding: "4%",
+    padding: 16,
     borderRadius: 8,
+    flexGrow: 1,
   },
   modalTitle: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 14,
     textAlign: "center",
   },
   rowContainer: {
@@ -244,8 +266,33 @@ const styles = StyleSheet.create({
   modalButtonsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-around",
-    paddingVertical: 20,
+    justifyContent: "space-between",
+    gap: 12,
+    paddingTop: 14,
+  },
+  actionButton: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  primaryButton: {
+    backgroundColor: "#005eb8",
+  },
+  secondaryButton: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+  },
+  actionButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  secondaryButtonText: {
+    color: "#111827",
   },
   errorText: {
     color: "red",

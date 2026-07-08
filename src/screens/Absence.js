@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -38,6 +38,7 @@ import { showToast } from "../utils/MessageUtils";
 // Custom components
 import CustomButton from "../components/CustomButton";
 import Loader from "../components/Loader";
+import ScreenHeader from "../components/ScreenHeader";
 import Sort from "../components/filters/Sort";
 import CustomBackButton from "../components/CustomBackButton";
 
@@ -56,6 +57,7 @@ import { screenDimension } from "../utils/ScreenUtils";
 const Absence = ({ route, navigation }) => {
   // Initialize useTranslation hook
   const { t } = useTranslation();
+  const hasUserScrolledRef = useRef(false);
 
   // Destructure the forceRefresh variable and updateForceRefresh function from the useAbsenceForceRefresh hook,
   // which is accessing the AbsenceForceRefreshContext.
@@ -133,6 +135,10 @@ const Absence = ({ route, navigation }) => {
    * @returns {void}
    */
   const handleLoadMoreData = useCallback(() => {
+    if (!hasUserScrolledRef.current || refreshing) {
+      return;
+    }
+
     // Check if the current data already contains all the items for the current page
     if (absences.length < page * limit) {
       showToast(t("no_more_data"), "warning");
@@ -393,7 +399,12 @@ const Absence = ({ route, navigation }) => {
   ]);
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
+    <View style={styles.screen}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView
+        style={styles.container}
+        edges={["right", "bottom", "left"]}
+      >
       {
         // Hack/Workaround for iOS: Display the loader manually when refreshing
         // state is true because onRefresh loader doesn't trigger correctly on
@@ -403,6 +414,7 @@ const Absence = ({ route, navigation }) => {
       <FlatList
         data={absences}
         keyExtractor={(item) => item["Absence-id"]}
+        contentContainerStyle={styles.listContainer}
         // Render each absence item
         renderItem={({ item, index }) => {
           try {
@@ -542,6 +554,9 @@ const Absence = ({ route, navigation }) => {
             return <Text style={{ color: "red" }}>{item?.["Absence-id"]}</Text>;
           }
         }}
+        onScrollBeginDrag={() => {
+          hasUserScrolledRef.current = true;
+        }}
         onEndReached={handleLoadMoreData}
         onEndReachedThreshold={0.1}
         ListFooterComponent={() => {
@@ -574,13 +589,20 @@ const Absence = ({ route, navigation }) => {
           previousSortRows={sortConditions}
         />
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flex: 1,
+  },
+  listContainer: {
+    paddingBottom: 24,
   },
   row: {
     flexDirection: "row",
@@ -626,7 +648,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    columnGap: 18,
+    columnGap: 6,
   },
   headerIconsContainer: {
     position: "relative",

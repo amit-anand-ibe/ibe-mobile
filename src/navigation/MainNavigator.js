@@ -92,65 +92,118 @@ const MainNavigator = () => {
         <Stack.Screen
           name="Home"
           component={Home}
-          options={{ headerLeft: null }}
+          options={{ headerShown: false }}
         />
-        <Stack.Screen name="Timesheet" component={Timesheet} />
-        <Stack.Screen name="TimesheetDetail" component={TimesheetDetail} />
-        <Stack.Screen name="Expense" component={Expense} />
-        <Stack.Screen name="ExpenseDetail" component={ExpenseDetail} />
-        <Stack.Screen name="Absence" component={Absence} />
-        <Stack.Screen name="AbsenceDetail" component={AbsenceDetail} />
-        <Stack.Screen name="User" component={User} />
-        <Stack.Screen name="Approval" component={Approval} />
-        <Stack.Screen name="FieldEngineer" component={FieldEngineerDashboard} />
+        <Stack.Screen
+          name="Timesheet"
+          component={Timesheet}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="TimesheetDetail"
+          component={TimesheetDetail}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Expense"
+          component={Expense}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ExpenseDetail"
+          component={ExpenseDetail}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Absence"
+          component={Absence}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AbsenceDetail"
+          component={AbsenceDetail}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="User"
+          component={User}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Approval"
+          component={Approval}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="FieldEngineer"
+          component={FieldEngineerDashboard}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="FieldEngineerConfiguration"
           component={FieldEngineerConfiguration}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FieldEngineerPolicies"
           component={FieldEngineerPolicyList}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FieldEngineerPolicyEdit"
           component={FieldEngineerPolicyEdit}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FieldEngineerChecklistTemplates"
           component={FieldEngineerChecklistTemplateList}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FieldEngineerChecklistTemplateEdit"
           component={FieldEngineerChecklistTemplateEdit}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FieldEngineerReviewTemplates"
           component={FieldEngineerReviewTemplateList}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FieldEngineerReviewTemplateEdit"
           component={FieldEngineerReviewTemplateEdit}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FieldEngineerAssignments"
           component={FieldEngineer}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="FieldEngineerTaskDetail"
           component={FieldEngineerTaskDetail}
+          options={{ headerShown: false }}
         />
 
         {/* CustomImagePicker screen with custom header options */}
         <Stack.Screen
           name="CustomImagePicker"
           component={CustomImagePicker}
-          options={{ headerTitle: "" }} // The header will have no title for this screen
+          options={{ headerShown: false }}
         />
 
         {/* Filters screen */}
-        <Stack.Screen name="Filters" component={Filters} />
+        <Stack.Screen
+          name="Filters"
+          component={Filters}
+          options={{ headerShown: false }}
+        />
 
-        <Stack.Screen name="Help" component={Help} />
+        <Stack.Screen
+          name="Help"
+          component={Help}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

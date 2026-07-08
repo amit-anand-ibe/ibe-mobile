@@ -13,6 +13,7 @@ import {
   Linking,
   Modal,
   PanResponder,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,7 +21,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Checkbox from "expo-checkbox";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
@@ -34,6 +38,7 @@ import Svg, { Path } from "react-native-svg";
 import { APP } from "../constants";
 import CustomBackButton from "../components/CustomBackButton";
 import PreviewDialog from "../components/dialogs/PreviewDialog";
+import ScreenHeader from "../components/ScreenHeader";
 import { fetchAndCacheResource, uploadBinaryResource } from "../utils/APIUtils";
 import { convertToDateFNSFormat } from "../utils/FormatUtils";
 import { screenDimension } from "../utils/ScreenUtils";
@@ -393,6 +398,7 @@ const getPersonDisplayName = (person = {}) => {
 
 const FieldEngineerTaskDetail = ({ route, navigation }) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { loggedInUserInfo = {} } = useContext(LoggedInUserInfoContext);
   const [task, setTask] = useState(route?.params?.task || {});
   const [statusSheetVisible, setStatusSheetVisible] = useState(false);
@@ -1552,7 +1558,9 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+    <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} />
+      <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.heroCard}>
           <View style={styles.heroIcon}>
@@ -2262,13 +2270,19 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
         animationType="slide"
         onRequestClose={closeSignOff}
       >
-        <View style={styles.modalBackdrop}>
+        <SafeAreaView
+          style={styles.modalBackdrop}
+          edges={["top", "right", "bottom", "left"]}
+        >
           <View style={styles.signOffSheet}>
             <View style={styles.statusSheetHeader}>
               <Text style={styles.statusSheetTitle}>
                 {t("field_engineer_customer_signoff")}
               </Text>
-              <TouchableOpacity onPress={closeSignOff}>
+              <TouchableOpacity
+                onPress={closeSignOff}
+                style={styles.sheetCloseButton}
+              >
                 <Ionicons name="close-outline" size={26} color="#111827" />
               </TouchableOpacity>
             </View>
@@ -2459,7 +2473,7 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
               )}
             </ScrollView>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
 
       <Modal
@@ -2468,7 +2482,10 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
         animationType="slide"
         onRequestClose={() => setReviewModalItem(null)}
       >
-        <View style={styles.modalBackdrop}>
+        <SafeAreaView
+          style={styles.modalBackdrop}
+          edges={["top", "right", "bottom", "left"]}
+        >
           <View style={styles.reviewSheet}>
             <View style={styles.statusSheetHeader}>
               <View style={styles.reviewSheetTitleContainer}>
@@ -2481,7 +2498,10 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
                   </Text>
                 )}
               </View>
-              <TouchableOpacity onPress={() => setReviewModalItem(null)}>
+              <TouchableOpacity
+                onPress={() => setReviewModalItem(null)}
+                style={styles.sheetCloseButton}
+              >
                 <Ionicons name="close-outline" size={26} color="#111827" />
               </TouchableOpacity>
             </View>
@@ -2543,7 +2563,7 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
               </View>
             )}
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
 
       <PreviewDialog
@@ -2566,7 +2586,10 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
           }
         }}
       >
-        <View style={styles.photoPreviewBackdrop}>
+        <SafeAreaView
+          style={styles.photoPreviewBackdrop}
+          edges={["top", "right", "bottom", "left"]}
+        >
           <View style={styles.photoPreviewSheet}>
             <Text style={styles.statusSheetTitle}>
               {t("field_engineer_review_photo")}
@@ -2626,7 +2649,7 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
 
       <Modal
@@ -2638,8 +2661,19 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
           setStatusValidationMessage("");
         }}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.statusSheet}>
+        <SafeAreaView
+          style={styles.modalBackdrop}
+          edges={["top", "right", "bottom", "left"]}
+        >
+          <View
+            style={[
+              styles.statusSheet,
+              {
+                paddingBottom:
+                  Math.max(insets.bottom, Platform.OS === "ios" ? 24 : 0) + 12,
+              },
+            ]}
+          >
             <View style={styles.statusSheetHeader}>
               <Text style={styles.statusSheetTitle}>
                 {t("field_engineer_update_status")}
@@ -2649,6 +2683,7 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
                   setStatusSheetVisible(false);
                   setStatusValidationMessage("");
                 }}
+                style={styles.sheetCloseButton}
               >
                 <Ionicons name="close-outline" size={26} color="#111827" />
               </TouchableOpacity>
@@ -2750,9 +2785,10 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
               />
             )}
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
@@ -3579,13 +3615,22 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 14,
     paddingHorizontal: 14,
     paddingTop: 14,
-    paddingBottom: 18,
+    paddingBottom: Platform.OS === "ios" ? 28 : 18,
   },
   statusSheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 8,
+  },
+  sheetCloseButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: -4,
+    marginRight: -4,
   },
   statusSheetTitle: {
     color: "#111827",

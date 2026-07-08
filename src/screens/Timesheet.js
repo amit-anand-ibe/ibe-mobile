@@ -32,6 +32,7 @@ import { screenDimension } from "../utils/ScreenUtils";
 import CustomButton from "../components/CustomButton";
 import CustomDateTimePicker from "../components/CustomDateTimePicker";
 import Loader from "../components/Loader";
+import ScreenHeader from "../components/ScreenHeader";
 
 import { useTimesheetForceRefresh } from "../../context/ForceRefreshContext";
 import Sort from "../components/filters/Sort";
@@ -54,6 +55,7 @@ const Timesheet = ({ route, navigation }) => {
   const { forceRefresh, updateForceRefresh } = useTimesheetForceRefresh();
 
   const navigationTimeoutRef = useRef(null); // Ref to store the timeout ID
+  const hasUserScrolledRef = useRef(false);
 
   // State variables
   const [refreshing, setRefreshing] = useState(false); // Pull-to-refresh
@@ -325,6 +327,10 @@ const Timesheet = ({ route, navigation }) => {
    * @returns {void}
    */
   const handleLoadMoreData = useCallback(() => {
+    if (!hasUserScrolledRef.current || refreshing) {
+      return;
+    }
+
     // Check if the current data already contains all the items for the current page
     if (timesheets.length < page * limit) {
       showToast(t("no_more_data"), "warning");
@@ -513,7 +519,12 @@ const Timesheet = ({ route, navigation }) => {
   ]);
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
+    <View style={styles.screen}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView
+        style={styles.container}
+        edges={["right", "bottom", "left"]}
+      >
       {
         // Hack/Workaround for iOS: Display the loader manually when refreshing
         // state is true because onRefresh loader doesn't trigger correctly on
@@ -523,6 +534,7 @@ const Timesheet = ({ route, navigation }) => {
       <FlatList
         data={timesheets}
         keyExtractor={(item) => item["TimeConfirmation-id"]}
+        contentContainerStyle={styles.listContainer}
         renderItem={({ item, index }) => {
           try {
             // Extracting and formatting data for each timesheet item
@@ -716,6 +728,9 @@ const Timesheet = ({ route, navigation }) => {
             );
           }
         }}
+        onScrollBeginDrag={() => {
+          hasUserScrolledRef.current = true;
+        }}
         onEndReached={handleLoadMoreData}
         onEndReachedThreshold={1}
         ListFooterComponent={() => {
@@ -740,7 +755,10 @@ const Timesheet = ({ route, navigation }) => {
         visible={isModalVisibleInCreate}
         onRequestClose={handleCloseModalInCreate}
       >
-        <View style={styles.modalOverlay}>
+        <SafeAreaView
+          style={styles.modalOverlay}
+          edges={["top", "right", "bottom", "left"]}
+        >
           <View style={styles.modalContent}>
             <Text style={styles.instructionTextInCreate}>
               {t("please_select_timesheet_create_date")}
@@ -775,7 +793,7 @@ const Timesheet = ({ route, navigation }) => {
               <Button title={t("cancel")} onPress={handleCloseModalInCreate} />
             </View>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
       {isSortModalVisible && (
         <Sort
@@ -792,13 +810,20 @@ const Timesheet = ({ route, navigation }) => {
           previousSortRows={sortConditions}
         />
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flex: 1,
+  },
+  listContainer: {
+    paddingBottom: 24,
   },
   row: {
     flexDirection: "row",
@@ -850,7 +875,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    columnGap: 18,
+    columnGap: 6,
   },
   headerIconsContainer: {
     position: "relative",

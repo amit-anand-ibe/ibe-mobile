@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { format, isValid } from "date-fns";
@@ -17,6 +18,7 @@ import { fetchBusObjCatData, loadMoreData } from "../utils/APIUtils";
 
 import CustomButton from "../components/CustomButton";
 import Sort from "../components/filters/Sort";
+import ScreenHeader from "../components/ScreenHeader";
 
 import { screenDimension } from "../utils/ScreenUtils";
 
@@ -43,6 +45,7 @@ import CustomBackButton from "../components/CustomBackButton";
 const Expense = ({ route, navigation }) => {
   // Initialize useTranslation hook
   const { t } = useTranslation();
+  const hasUserScrolledRef = useRef(false);
 
   // State variables
   const [refreshing, setRefreshing] = useState(false);
@@ -96,6 +99,10 @@ const Expense = ({ route, navigation }) => {
    * Function to handle loading more data.
    */
   const handleLoadMoreData = useCallback(() => {
+    if (!hasUserScrolledRef.current || refreshing) {
+      return;
+    }
+
     if (expenses.length < page * limit) {
       showToast(t("no_more_data"), "warning");
       return;
@@ -289,8 +296,13 @@ const Expense = ({ route, navigation }) => {
   ]);
 
   return (
-    <View style={styles.container}>
-      <FlatList
+    <View style={styles.screen}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView
+        style={styles.container}
+        edges={["right", "bottom", "left"]}
+      >
+        <FlatList
         data={expenses}
         keyExtractor={(item) => item["ExpenseClaim-id"]}
         renderItem={({ item }) => {
@@ -398,8 +410,12 @@ const Expense = ({ route, navigation }) => {
             );
           }
         }}
+        onScrollBeginDrag={() => {
+          hasUserScrolledRef.current = true;
+        }}
         onEndReached={handleLoadMoreData}
         onEndReachedThreshold={0.1}
+        contentContainerStyle={styles.listContainer}
         refreshing={isLoading}
         ListFooterComponent={() => {
           return isLoading ? <Loader /> : null;
@@ -408,24 +424,28 @@ const Expense = ({ route, navigation }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
-      {isSortModalVisible && (
-        <Sort
-          isModalVisible={isSortModalVisible}
-          onClose={closeSortingModal}
-          busObjCat={BUSOBJCATMAP[BUSOBJCAT.EXPENSE]}
-          allFields={[
-            { propertyLabel: "Claim ID", propertyValue: "extID" },
-            { propertyLabel: "Amount", propertyValue: "amountBU" },
-            { propertyLabel: "Date", propertyValue: "date" },
-          ]}
-          previousSortRows={sortConditions}
-        />
-      )}
+        {isSortModalVisible && (
+          <Sort
+            isModalVisible={isSortModalVisible}
+            onClose={closeSortingModal}
+            busObjCat={BUSOBJCATMAP[BUSOBJCAT.EXPENSE]}
+            allFields={[
+              { propertyLabel: "Claim ID", propertyValue: "extID" },
+              { propertyLabel: "Amount", propertyValue: "amountBU" },
+              { propertyLabel: "Date", propertyValue: "date" },
+            ]}
+            previousSortRows={sortConditions}
+          />
+        )}
+      </SafeAreaView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   recordCountText: {
     fontSize: 18,
     fontWeight: "bold",
@@ -433,6 +453,9 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  listContainer: {
+    paddingBottom: 24,
   },
   row: {
     flexDirection: "row",
@@ -474,7 +497,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    columnGap: 18,
+    columnGap: 6,
   },
   headerIconsContainer: {
     position: "relative",

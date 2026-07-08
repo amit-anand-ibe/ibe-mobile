@@ -4,6 +4,7 @@ import {
   Easing,
   Image,
   StyleSheet,
+  View,
 } from "react-native";
 import PropTypes from "prop-types";
 import splashImage from "../assets/images/ibe-splash-white.png";

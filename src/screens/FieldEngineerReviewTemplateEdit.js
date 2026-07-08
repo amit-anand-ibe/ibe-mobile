@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import CustomBackButton from "../components/CustomBackButton";
+import ScreenHeader from "../components/ScreenHeader";
 import {
   CustomerSettingPicker,
   ProjectSettingPicker,
@@ -456,12 +457,14 @@ const FieldEngineerReviewTemplateEdit = ({ navigation, route }) => {
     : {};
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-      >
+    <View style={styles.container}>
+      <ScreenHeader left={headerLeft()} right={headerRight()} />
+      <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        >
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.content}
@@ -688,8 +691,9 @@ const FieldEngineerReviewTemplateEdit = ({ navigation, route }) => {
             ))}
           </View>
       </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 };
 

@@ -8,11 +8,17 @@ import {
   ActivityIndicator,
   View,
   TouchableOpacity,
+  Platform,
+  StatusBar,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import {
   Gesture,
@@ -63,6 +69,10 @@ const PreviewDialog = ({
 }) => {
   // Initialize useTranslation hook
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const topInsetFallback =
+    Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 24;
+  const bottomInsetFallback = Platform.OS === "ios" ? 24 : 12;
 
   // State to manage loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -287,7 +297,18 @@ const PreviewDialog = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
+      <SafeAreaView
+        style={[
+          styles.overlay,
+          {
+            paddingTop:
+              Math.max(insets.top, topInsetFallback) + 12,
+            paddingBottom:
+              Math.max(insets.bottom, bottomInsetFallback) + 12,
+          },
+        ]}
+        edges={["top", "right", "bottom", "left"]}
+      >
         <View style={styles.container}>
           <View style={styles.previewHeader}>
             <Text style={styles.headerTitle} numberOfLines={2} ellipsizeMode="tail">
@@ -307,7 +328,7 @@ const PreviewDialog = ({
             )}
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };
@@ -325,6 +346,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.88)",
     padding: 10,
+    paddingTop: 16,
   },
   container: {
     width: "100%",
@@ -345,6 +367,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingTop: 8,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.15)",
     paddingBottom: 10,
