@@ -510,13 +510,15 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
     !reviewRequired ||
     (!reviewConfigurationMissing &&
       (!hasRequiredReviewItems || !!reviewAcknowledgement));
+  const isSignOffStatusReady =
+    task.status === WORKFLOW_STATUS.WORK_STARTED ||
+    task.status === "In Progress" ||
+    validTransitions.includes(WORKFLOW_STATUS.COMPLETED);
   const canCollectSignOff =
     showSignOffSection &&
     completionPrerequisitesMet &&
     reviewPrerequisitesMet &&
-    (task.status === WORKFLOW_STATUS.WORK_STARTED ||
-      task.status === "In Progress" ||
-      validTransitions.includes(WORKFLOW_STATUS.COMPLETED));
+    isSignOffStatusReady;
   const signOffActionLabel = signOff
     ? t("field_engineer_update_signoff")
     : t("field_engineer_collect_signoff");
@@ -536,6 +538,7 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
       : hasRequiredReviewItems && !reviewAcknowledgement
         ? t("field_engineer_completion_review_required")
         : "",
+    !isSignOffStatusReady ? t("field_engineer_signoff_status_required") : "",
   ].filter(Boolean);
 
   const headerLeft = useCallback(
@@ -1204,32 +1207,32 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
       const photoAttachmentInfo = await fetchAttachmentResourceInfo(
         uploadedPhoto.attachmentId
       );
-
-      await persistExecutionState({
+      const nextPhoto = {
+        id: `${Date.now()}`,
+        uri: targetUri,
+        resourceID:
+          photoAttachmentInfo.original ||
+          uploadedPhoto.resourceId ||
+          uploadedPhoto.attachmentId,
+        attachmentID: uploadedPhoto.attachmentId,
+        thumbnailID:
+          photoAttachmentInfo.thumbnail ||
+          uploadedPhoto.thumbId ||
+          uploadedPhoto.thumbID ||
+          "",
+        fileName,
+        timestamp,
+        location,
+        assignmentId: task.id || task.extId || "",
+        uploadedBy: getCollectorId(),
+      };
+      const nextExecutionState = {
         ...executionState,
-        photos: [
-          ...executionState.photos,
-          {
-            id: `${Date.now()}`,
-            uri: targetUri,
-            resourceID:
-              photoAttachmentInfo.original ||
-              uploadedPhoto.resourceId ||
-              uploadedPhoto.attachmentId,
-            attachmentID: uploadedPhoto.attachmentId,
-            thumbnailID:
-              photoAttachmentInfo.thumbnail ||
-              uploadedPhoto.thumbId ||
-              uploadedPhoto.thumbID ||
-              "",
-            fileName,
-            timestamp,
-            location,
-            assignmentId: task.id || task.extId || "",
-            uploadedBy: getCollectorId(),
-          },
-        ],
-      });
+        photos: [...executionState.photos, nextPhoto],
+      };
+
+      setExecutionState(nextExecutionState);
+      await persistExecutionState(nextExecutionState);
       setPendingPhoto(null);
       showToast(t("field_engineer_photo_saved"));
     } catch (error) {
@@ -2286,7 +2289,17 @@ const FieldEngineerTaskDetail = ({ route, navigation }) => {
                 <Ionicons name="close-outline" size={26} color="#111827" />
               </TouchableOpacity>
             </View>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={[
+                styles.signOffSheetContent,
+                {
+                  paddingBottom:
+                    Math.max(insets.bottom, Platform.OS === "ios" ? 24 : 0) +
+                    18,
+                },
+              ]}
+            >
               <View style={styles.signOffContext}>
                 <DetailRow
                   label={t("field_engineer_task_id")}
@@ -3330,6 +3343,9 @@ const styles = StyleSheet.create({
     borderColor: "#d7dee8",
     paddingHorizontal: 12,
     marginBottom: 12,
+  },
+  signOffSheetContent: {
+    paddingBottom: 18,
   },
   signOffModeRow: {
     flexDirection: "row",

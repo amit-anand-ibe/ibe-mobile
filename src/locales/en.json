@@ -321,6 +321,7 @@
   "field_engineer_collect_signoff": "Collect Sign-Off",
   "field_engineer_update_signoff": "Update Sign-Off",
   "field_engineer_signoff_prerequisites": "Complete required checklist items and add at least one work photo before collecting sign-off.",
+  "field_engineer_signoff_status_required": "Record progress to Work Started before collecting customer sign-off.",
   "field_engineer_customer_name": "Customer Name",
   "field_engineer_customer_name_placeholder": "Enter customer name",
   "field_engineer_customer_name_required": "Customer name is required.",
