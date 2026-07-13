@@ -62,8 +62,28 @@ const listQueryFields = {
     "Lists-text",
     "Lists-text-text",
   ],
+  where: [
+    {
+      fieldName: "Lists-extID",
+      operator: "contains",
+      value: "FieldService",
+    },
+  ],
   sort: [{ property: "Lists-extID", direction: "ASC" }],
 };
+
+const getListQueryFields = (listExtID = "") => ({
+  ...listQueryFields,
+  where: listExtID
+    ? [
+        {
+          fieldName: "Lists-extID",
+          operator: "=",
+          value: listExtID,
+        },
+      ]
+    : listQueryFields.where,
+});
 
 const getProjectQueryFields = (customerID) => {
   const queryFields = {
@@ -267,16 +287,21 @@ export const ReviewTemplateSettingPicker = ({
   />
 );
 
-export const ListSettingPicker = ({ label, value, onChange }) => (
+export const ListSettingPicker = ({
+  label,
+  value,
+  onChange,
+  listExtID = "",
+}) => (
   <RemoteSettingPicker
     label={label}
-    queryFields={listQueryFields}
-    initialAdditionalLabel={value}
-    initialItemLabel={value}
-    initialItemValue={value}
+    queryFields={getListQueryFields(listExtID)}
+    initialAdditionalLabel=""
+    initialItemLabel={value || listExtID}
+    initialItemValue={value || listExtID}
     labelItemField="Lists-extID"
     valueItemField="Lists-extID"
-    additionalFields={[{ extID: "Lists-extID" }]}
+    additionalFields={[]}
     searchFields={["Lists-extID", "Lists-text-text"]}
     onValueChange={({ value: selectedValue }) => onChange(selectedValue || "")}
   />

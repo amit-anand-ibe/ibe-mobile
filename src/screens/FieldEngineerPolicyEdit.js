@@ -21,7 +21,6 @@ import ScreenHeader from "../components/ScreenHeader";
 import {
   ChecklistTemplateSettingPicker,
   CustomerSettingPicker,
-  ListSettingPicker,
   ProjectSettingPicker,
   ReviewTemplateSettingPicker,
   TaskTypeSettingPicker,
@@ -32,6 +31,9 @@ import {
   fetchFieldServicePolicies,
   saveFieldServicePolicy,
 } from "../utils/FieldEngineerUtils";
+
+const SIGN_OFF_SKIP_REASON_LIST_ID = "FieldServiceSignOffSkipReasons";
+const BLOCKED_REASON_LIST_ID = "FieldServiceBlockedReasons";
 
 const defaultPolicy = {
   id: "",
@@ -55,8 +57,8 @@ const defaultPolicy = {
   checklistTemplateLabel: "",
   reviewTemplateID: "",
   reviewTemplateLabel: "",
-  skipReasonListID: "",
-  blockedReasonListID: "",
+  skipReasonListID: SIGN_OFF_SKIP_REASON_LIST_ID,
+  blockedReasonListID: BLOCKED_REASON_LIST_ID,
   taskChangedSince: "",
 };
 
@@ -85,6 +87,16 @@ const FieldRow = ({
     />
     {!!error && <Text style={styles.errorText}>{error}</Text>}
     {!error && !!helperText && <Text style={styles.helperText}>{helperText}</Text>}
+  </View>
+);
+
+const ReadOnlyFieldRow = ({ label, value, helperText = "" }) => (
+  <View style={styles.fieldRow}>
+    <Text style={styles.label}>{label}</Text>
+    <View style={styles.readOnlyValueBox}>
+      <Text style={styles.readOnlyValueText}>{value}</Text>
+    </View>
+    {!!helperText && <Text style={styles.helperText}>{helperText}</Text>}
   </View>
 );
 
@@ -201,6 +213,10 @@ const FieldEngineerPolicyEdit = ({ navigation, route }) => {
       existingPolicy?.customerReviewRequired ??
         defaultPolicy.customerReviewRequired
     ),
+    skipReasonListID:
+      existingPolicy?.skipReasonListID || defaultPolicy.skipReasonListID,
+    blockedReasonListID:
+      existingPolicy?.blockedReasonListID || defaultPolicy.blockedReasonListID,
     taskChangedSince: getDateInputValue(existingPolicy?.taskChangedSince),
   });
   const [saving, setSaving] = useState(false);
@@ -243,6 +259,10 @@ const FieldEngineerPolicyEdit = ({ navigation, route }) => {
         existingPolicy?.customerReviewRequired ??
           defaultPolicy.customerReviewRequired
       ),
+      skipReasonListID:
+        existingPolicy?.skipReasonListID || defaultPolicy.skipReasonListID,
+      blockedReasonListID:
+        existingPolicy?.blockedReasonListID || defaultPolicy.blockedReasonListID,
       taskChangedSince: getDateInputValue(existingPolicy?.taskChangedSince),
     });
   }, [existingPolicy]);
@@ -651,22 +671,16 @@ const FieldEngineerPolicyEdit = ({ navigation, route }) => {
           <Text style={styles.helperText}>
             {t("field_engineer_policy_review_template_helper")}
           </Text>
-          <ListSettingPicker
+          <ReadOnlyFieldRow
             label={t("field_engineer_policy_skip_reason_list")}
             value={policy.skipReasonListID}
-            onChange={(value) => updatePolicy("skipReasonListID", value)}
+            helperText={t("field_engineer_policy_skip_reason_list_helper")}
           />
-          <Text style={styles.helperText}>
-            {t("field_engineer_policy_skip_reason_list_helper")}
-          </Text>
-          <ListSettingPicker
+          <ReadOnlyFieldRow
             label={t("field_engineer_policy_blocked_reason_list")}
             value={policy.blockedReasonListID}
-            onChange={(value) => updatePolicy("blockedReasonListID", value)}
+            helperText={t("field_engineer_policy_blocked_reason_list_helper")}
           />
-          <Text style={styles.helperText}>
-            {t("field_engineer_policy_blocked_reason_list_helper")}
-          </Text>
         </View>
 
       </ScrollView>
@@ -745,6 +759,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     fontSize: 15,
     fontWeight: "600",
+  },
+  readOnlyValueBox: {
+    minHeight: 44,
+    borderWidth: 1,
+    borderColor: "#d7dee8",
+    borderRadius: 8,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    backgroundColor: "#eef3f8",
+  },
+  readOnlyValueText: {
+    color: "#374151",
+    fontSize: 15,
+    fontWeight: "700",
   },
   inputError: {
     borderColor: "#b42318",

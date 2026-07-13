@@ -193,6 +193,15 @@ Policies configure execution behavior such as:
 
 Policy scope can be narrowed by task type, customer, project, and effective dates. More specific matching policies win over generic defaults.
 
+Reason lists are maintained in the standard `Lists` collection. The mobile policy editor uses fixed list IDs so each reason type stays separate:
+
+| Reason Type | Lists ID |
+| --- | --- |
+| Customer sign-off skip reasons | `FieldServiceSignOffSkipReasons` |
+| Blocked assignment reasons | `FieldServiceBlockedReasons` |
+
+If either list is unavailable or has no usable entries, the app falls back to standard built-in reasons.
+
 ### Checklist Templates
 
 Checklist templates define the checklist shown on Job Detail. Items support:

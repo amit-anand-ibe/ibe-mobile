@@ -401,6 +401,16 @@ const getUserFacingDisplayValue = (value, fallback = "") => {
   return displayValue;
 };
 
+const isTechnicalListEntryValue = (value = "") => {
+  const normalizedValue = String(value || "").trim();
+
+  if (!normalizedValue) {
+    return true;
+  }
+
+  return /^[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$/.test(normalizedValue);
+};
+
 const getGeoCoordinates = (value) => {
   if (Array.isArray(value) && value.length >= 2) {
     const longitude = Number(value[0]);
@@ -1169,7 +1179,12 @@ const fetchFieldServiceListEntries = async (listExtID = "") => {
     const entries = response?.data?.[0]?.["Lists-listEntries"] || [];
     const normalizedEntries = entries
       .filter((entry) => entry?.intStatus !== INTSTATUS.DELETED)
-      .map((entry) => entry.entryName || entry.entryID || "")
+      .map((entry) => {
+        const entryName = getUserFacingDisplayValue(entry.entryName || "");
+        const entryID = getUserFacingDisplayValue(entry.entryID || "");
+
+        return entryName || (isTechnicalListEntryValue(entryID) ? "" : entryID);
+      })
       .filter(Boolean);
 
     fieldServiceListEntryCache[trimmedListExtID] = normalizedEntries;
