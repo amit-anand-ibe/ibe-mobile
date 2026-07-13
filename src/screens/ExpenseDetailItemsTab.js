@@ -12,6 +12,7 @@ import {
 
 import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { format } from "date-fns";
 
@@ -53,7 +54,9 @@ const ExpenseDetailItemsTab = ({
   expenseDetail,
 }) => {
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const lang = i18n.language;
+  const floatingButtonBottom = Math.max(insets.bottom, 24) + 20;
 
   const {
     expenseStart,
@@ -1126,7 +1129,12 @@ const ExpenseDetailItemsTab = ({
           </View>
         ))}
       </ScrollView>
-      <View style={styles.floatingContainer}>
+      <View
+        style={[
+          styles.floatingContainer,
+          { bottom: floatingButtonBottom },
+        ]}
+      >
         <CustomButton
           onPress={() => handleCreateItemClick()}
           label=""
@@ -1307,7 +1315,6 @@ const styles = StyleSheet.create({
   },
   floatingContainer: {
     position: "absolute",
-    bottom: 20,
     right: 20,
     flexDirection: "row",
     alignItems: "center",

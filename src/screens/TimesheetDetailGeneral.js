@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { FlatList } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { addDays, format, eachDayOfInterval, isValid, parse } from "date-fns";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -58,7 +59,9 @@ const TimesheetDetailGeneral = ({
   timesheetDetail,
 }) => {
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const lang = i18n.language;
+  const floatingButtonBottom = Math.max(insets.bottom, 24) + 20;
 
   const {
     hireDate,
@@ -2210,7 +2213,12 @@ const TimesheetDetailGeneral = ({
           </View>
           {renderTimesheetItems()}
           {!loading && !keyboardShown && (
-            <View style={styles.floatingContainer}>
+            <View
+              style={[
+                styles.floatingContainer,
+                { bottom: floatingButtonBottom },
+              ]}
+            >
               <CustomButton
                 onPress={() => handleCreateItemClick()}
                 label=""
@@ -2450,7 +2458,6 @@ const styles = StyleSheet.create({
   },
   floatingContainer: {
     position: "absolute",
-    bottom: 20,
     right: 20,
     alignItems: "center",
   },

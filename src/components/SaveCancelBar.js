@@ -1,5 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CustomButton from "./CustomButton";
 
 /**
@@ -34,6 +35,11 @@ const SaveCancelBar = ({
   accessibilityRole,
   testID,
 }) => {
+  const insets = useSafeAreaInsets();
+  const floatingContainerStyle = [
+    styles.floatingContainer,
+    { bottom: Math.max(insets.bottom, 24) + 20 },
+  ];
   const saveIconProps = isFloating
     ? { name: saveIcon, size: 32 }
     : { name: saveIcon };
@@ -44,7 +50,7 @@ const SaveCancelBar = ({
 
   return (
     <View
-      style={isFloating ? styles.floatingContainer : styles.barContainer}
+      style={isFloating ? floatingContainerStyle : styles.barContainer}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={accessibilityRole}
       testID={testID}
@@ -82,7 +88,6 @@ const styles = StyleSheet.create({
   },
   floatingContainer: {
     position: "absolute",
-    bottom: 20,
     right: 20,
     alignItems: "center",
   },
