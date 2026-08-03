@@ -299,7 +299,7 @@ const TimesheetDetailItemEditor = ({
     setTimeValue(text);
 
     // Calculate the actual time based on the entered text and the current time unit
-    actualTime = calculateActualTime(text, timeUnit);
+    const actualTime = calculateActualTime(text, timeUnit);
 
     // Update the editedItem state with the new calculated actualTime
     setEditedItem((prevItem) => ({

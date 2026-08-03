@@ -414,7 +414,7 @@ const Home = ({ route, navigation }) => {
               />
             ),
             count: fieldEngineerTaskCount,
-            showBetaBadge: true,
+            showBetaBadge: false,
           })}
       </ScrollView>
       </SafeAreaView>
