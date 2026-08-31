@@ -309,20 +309,34 @@ const TimesheetDetailItemEditor = ({
   };
 
   const handleQuantityValueChange = (text) => {
-    // Parse and round quantity
-    let qty = parseFloat(text || "0");
-    const coeff = Math.pow(10, decimalsAllowedInUnit);
-    qty = Math.round(qty * coeff) / coeff;
+    // Allow only numbers and a single decimal point
+    if (!/^\d*\.?\d*$/.test(text)) {
+      return;
+    }
 
-    // Calculate actual time (if needed)
+    // Enforce allowed decimal places
+    const decimalIndex = text.indexOf(".");
+    if (
+      decimalIndex !== -1 &&
+      text.length - decimalIndex - 1 > decimalsAllowedInUnit
+    ) {
+      return;
+    }
+
+    // Preserve exactly what the user typed
+    setQuantityValue(text);
+
+    // Convert to numeric value only for calculations
+    const qty = text === "" || text === "." ? 0 : parseFloat(text);
     const actualTime = qty * (quantityToTimeUnit || 3600000);
 
-    // Update state with rounded quantity
-    setQuantityValue(qty.toString());
     setEditedItem((prevItem) => ({
       ...prevItem,
-      actualQuantity: { quantity: qty, unit: quantityUnit },
-      actualTime,
+      actualQuantity: {
+        quantity: Number.isNaN(qty) ? 0 : qty,
+        unit: quantityUnit,
+      },
+      actualTime: Number.isNaN(actualTime) ? 0 : actualTime,
     }));
   };
 
@@ -515,6 +529,19 @@ const TimesheetDetailItemEditor = ({
     }
 
     const updatedItem = { ...editedItem };
+
+    if (isQuantityAllowedTask) {
+      const qty = parseFloat(quantityValue || "0");
+      const coeff = Math.pow(10, decimalsAllowedInUnit);
+      const roundedQty = Math.round(qty * coeff) / coeff;
+
+      updatedItem.actualQuantity = {
+        quantity: roundedQty,
+        unit: quantityUnit,
+      };
+
+      updatedItem.actualTime = roundedQty * (quantityToTimeUnit || 3600000);
+    }
 
     if (!isEqual(updatedItem, initialItem)) {
       updatedItem.isDirty = true;
@@ -1304,8 +1331,8 @@ const TimesheetDetailItemEditor = ({
                     isBillableDisabled
                       ? "#bcbcbc" // Greyed out when disabled
                       : editedItem.billable
-                      ? "#ffffff"
-                      : "#a0a0a0"
+                        ? "#ffffff"
+                        : "#a0a0a0"
                   }
                   ios_backgroundColor="#d3d3d3"
                   value={editedItem.billable}
